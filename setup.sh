@@ -22,24 +22,19 @@ brew install gmp mpfr libmpc
 mkdir build-binutils && pushd build-binutils
     ../binutils-$BINUTILS_VERSION/configure --prefix=$PREFIX \
                                             --target=$TARGET \
-                                            --enable-interwork \
-                                            --enable-multilib \
                                             --disable-nls \
+                                            --with-sysroot \
                                             --disable-werror
     make && make install
 popd
 
+# Build a cross-compiler that links against newbos.
 mkdir build-gcc && pushd build-gcc
     ../gcc-$GCC_VERSION/configure --prefix=$PREFIX \
                                   --target=$TARGET \
                                   --disable-nls \
                                   --enable-languages=c \
-                                  --without-headers \
-                                  --enable-interwork \
-                                  --enable-multilib \
-                                  --with-gmp=/usr \
-                                  --with-mpc=/opt/local \
-                                  --with-mpfr=/opt/local
+                                  --without-headers
     make all-gcc all-target-libgcc
     make install-gcc
     make install-target-libgcc
