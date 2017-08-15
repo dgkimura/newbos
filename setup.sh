@@ -17,9 +17,13 @@ if [ ! -f gcc-$GCC_VERSION.tar.gz ]; then
 
 fi
 
-brew install gmp mpfr libmpc
+if [[ `uname` == 'Darwin' ]]; then
+    brew install gmp mpfr libmpc
+elif [[ `uname` == 'Linux' ]]; then
+    apt-get install libmpc-dev xorriso qemu-system-x86
+fi
 
-mkdir build-binutils && pushd build-binutils
+mkdir -p build-binutils && pushd build-binutils
     ../binutils-$BINUTILS_VERSION/configure --prefix=$PREFIX \
                                             --target=$TARGET \
                                             --disable-nls \
@@ -29,7 +33,7 @@ mkdir build-binutils && pushd build-binutils
 popd
 
 # Build a cross-compiler that links against newbos.
-mkdir build-gcc && pushd build-gcc
+mkdir -p build-gcc && pushd build-gcc
     ../gcc-$GCC_VERSION/configure --prefix=$PREFIX \
                                   --target=$TARGET \
                                   --disable-nls \
