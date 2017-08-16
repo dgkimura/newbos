@@ -14,9 +14,11 @@ lib/string.c \
 OBJECTS=$(SOURCES:.c=.o)
 
 ARCH_SOURCES=\
-$(ARCHDIR)/boot.s
+$(ARCHDIR)/boot.s \
+$(ARCHDIR)/tty.c \
 
 ARCH_OBJECTS=$(ARCH_SOURCES:.s=.o)
+ARCH_OBJECTS=$(ARCH_SOURCES:.c=.o)
 
 EXECUTABLE=newbos.bin libc.a
 
@@ -29,7 +31,7 @@ libc.a: $(OBJECTS)
 	$(AR) rcs $@ $(OBJECTS)
 
 .c.o:
-	$(CC) $(CFLAGS) -c $< -o $@ -I include
+	$(CC) $(CFLAGS) -c $< -o $@ -I include -I kernel/include
 
 .s.o:
 	$(AS) -c $< -o $@
