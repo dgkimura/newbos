@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include <newbos/tty.h>
+#include <newbos/gdt.h>
 
 #if !defined(__i386__)
 #error "Must be compiled with an ix86-elf compiler"
@@ -11,6 +12,8 @@
 
 void kernel_main(void)
 {
+	gdt_install();
+
     /* Initialize terminal interface */
     terminal_initialize();
 

@@ -15,6 +15,7 @@ OBJECTS=$(SOURCES:.c=.o)
 
 ARCH_SOURCES=\
 $(ARCHDIR)/boot.s \
+$(ARCHDIR)/gdt.c \
 $(ARCHDIR)/tty.c \
 
 ARCH_OBJECTS=$(ARCH_SOURCES:.s=.o)
