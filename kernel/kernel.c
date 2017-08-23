@@ -1,22 +1,24 @@
-#include <string.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
 #include <newbos/tty.h>
-#include <newbos/gdt.h>
 
 #if !defined(__i386__)
 #error "Must be compiled with an ix86-elf compiler"
 #endif
 
-void kernel_main(void)
+extern void init_gdt();
+extern void init_idt();
+
+void
+kernel_main(void)
 {
-	gdt_install();
+    init_gdt();
+    init_idt();
 
     /* Initialize terminal interface */
-    terminal_initialize();
+    monitor_clear();
 
     /* Newline support is left as an exercise. */
-    terminal_writestring("Hello, kernel World!\n");
+    monitor_write("Hello, kernel World!\n");
+
+    asm volatile ("int $0x3");
+    asm volatile ("int $0x4");
 }

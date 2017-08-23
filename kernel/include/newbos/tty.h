@@ -1,10 +1,18 @@
-#ifndef _NEWBOS_TTY_H_
+#ifndef _NEWBOS_TTY_H
+#define _NEWBOS_TTY_H
 
-#include <stddef.h>
+#include <stdint.h>
 
-void terminal_initialize(void);
-void terminal_putchar(char c);
-void terminal_write(const char *data, size_t size);
-void terminal_writestring(const char *data);
+// Write a single character out to the screen.
+void monitor_put(char c);
 
-#endif
+// Clear the screen to all black.
+void monitor_clear();
+
+// Output a null-terminated ASCII string to the monitor.
+void monitor_write(char *c);
+
+void monitor_write_dec(uint32_t n);
+
+#endif // MONITOR_H
+
