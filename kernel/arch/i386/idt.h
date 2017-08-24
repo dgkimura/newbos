@@ -70,12 +70,12 @@ typedef struct registers
     uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
 
     // Interrupt number and error code (if applicable)
-    uint32_t int_no, err_code;
+    uint32_t error_code, interrupt_number;
 
     // Pushed by the processor automatically.
     uint32_t eip, cs, eflags, useresp, ss;
 } registers_t;
 
-extern void isr_handler(registers_t regs);
+extern void interrupt_handler(registers_t regs);
 
 #endif

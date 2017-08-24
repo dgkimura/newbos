@@ -261,36 +261,42 @@ mode segments, calls the c-level fault hander, and finally restores the stack
 frame.
 */
 isr_common_stub:
-    /* pushes edi, esi, ebp, esp, ebx, edx, ecs, eax */
-    pusha
+    pushl   %ds
+    pushl   %eax
+    pushl   %ecx
+    pushl   %edx
+    pushl   %ebx
+    pushl   %esp
+    pushl   %ebp
+    pushl   %esi
 
-    mov %ds, %ax
-    push %eax
+    # push interrupt code and interrupt number
+    pushl   36(%esp)
+    pushl   36(%esp)
 
-    /* loads the kernel data segment descriptor */
-    mov $0x10, %ax
-    mov %ax, %ds
-    mov %ax, %es
-    mov %ax, %fs
-    mov %ax, %gs
+    # load the kernel data segment descriptor
+    mov     $0x10, %ax
+    mov     %ax, %ds
+    mov     %ax, %es
+    mov     %ax, %fs
+    mov     %ax, %gs
+    mov     %ax, %ss
 
-    call isr_handler
+    call    interrupt_handler
 
-    /* reload the original data segment descriptor */
-    pop %edx
-    mov %bx, %ds
-    mov %bx, %es
-    mov %bx, %fs
-    mov %bx, %gs
+    addl    $4, %esp
+    addl    $4, %esp
 
-    /* pops edi, esi, ebp, esp, ebx, edx, ecs, eax */
-    popa
-
-    /* cleans up the pushed error code and pushed ISR number */
-    add %esp, 8
-    sti
-
-    /* pops 5 things at once: cs, eip, eflags, ss, and esp */
+    popl    %esi
+    popl    %ebp
+    popl    %esp
+    popl    %ebx
+    popl    %edx
+    popl    %ecx
+    popl    %eax
+    popl    %ds
+    addl    $4, %esp
+    addl    $4, %esp
     iret
 
 /*
@@ -301,14 +307,4 @@ This is a function to load the idt.
 idt_flush:
     mov 4(%esp), %eax
     lidt (%eax)
-    jmp $0x08, $flush
-
-flush:
-    # load the kernel data segment descriptor
-    mov $0x10, %ax
-    mov %ax, %ds
-    mov %ax, %es
-    mov %ax, %fs
-    mov %ax, %gs
-    mov %ax, %ss
     ret
