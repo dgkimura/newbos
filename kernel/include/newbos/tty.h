@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+void outb(uint16_t port, uint8_t value);
+
 // Write a single character out to the screen.
 void monitor_put(char c);
 

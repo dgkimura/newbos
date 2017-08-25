@@ -3,6 +3,29 @@ These are the interrupt service routines that our interrupt-descriptor-table
 references. The values pushed are the error code followed by the interrupt
 number. In the case where the interrupt doesn't push an error code, a dummy of
 0 is pushed instead.
+
+    Identifier   Description
+
+    0            Divide error
+    1            Debug exceptions
+    2            Nonmaskable interrupt
+    3            Breakpoint (one-byte INT 3 instruction)
+    4            Overflow (INTO instruction)
+    5            Bounds check (BOUND instruction)
+    6            Invalid opcode
+    7            Coprocessor not available
+    8            Double fault
+    9            (reserved)
+    10           Invalid TSS
+    11           Segment not present
+    12           Stack exception
+    13           General protection
+    14           Page fault
+    15           (reserved)
+    16           Coprecessor error
+    17-31        (reserved)
+    32-255       Available for external interrupts via INTR pin
+
 */
 
 .global isr0
