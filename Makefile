@@ -17,6 +17,7 @@ ARCH_SOURCES=\
 $(ARCHDIR)/boot.s \
 $(ARCHDIR)/idt.c \
 $(ARCHDIR)/idt.s \
+$(ARCHDIR)/irq.s \
 $(ARCHDIR)/gdt.c \
 $(ARCHDIR)/gdt.s \
 $(ARCHDIR)/tty.c \

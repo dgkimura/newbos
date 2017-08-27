@@ -32,6 +32,20 @@ init_idt()
 
     memset(&idt_entries, 0, sizeof(idt_entry_t)*256);
 
+    // Remap the IRQ table.
+    //   Master - command: 0x20, data: 0x21
+    //   Slave - command: 0xA0, data: 0xA1
+    outb(0x20, 0x11);
+    outb(0xA0, 0x11);
+    outb(0x21, 0x20);
+    outb(0xA1, 0x28);
+    outb(0x21, 0x04);
+    outb(0xA1, 0x02);
+    outb(0x21, 0x01);
+    outb(0xA1, 0x01);
+    outb(0x21, 0x0);
+    outb(0xA1, 0x0);
+
     idt_set_gate(0, (uint32_t)isr0, 0x08, 0x8E);
     idt_set_gate(1, (uint32_t)isr1, 0x08, 0x8E);
     idt_set_gate(2, (uint32_t)isr2, 0x08, 0x8E);
@@ -65,6 +79,8 @@ init_idt()
     idt_set_gate(30, (uint32_t)isr30, 0x08, 0x8E);
     idt_set_gate(31, (uint32_t)isr31, 0x08, 0x8E);
 
+    idt_set_gate(32, (uint32_t)irq0, 0x08, 0x8E);
+
     idt_flush((uint32_t)&idt_ptr);
 }
 
@@ -72,6 +88,16 @@ void
 interrupt_handler(registers_t regs)
 {
     monitor_write("recieved interrupt: ");
+    monitor_write_dec(regs.interrupt_number);
+    monitor_write("  error-code: ");
+    monitor_write_dec(regs.error_code);
+    monitor_write("\n");
+}
+
+void
+irq_handler(registers_t regs)
+{
+    monitor_write("received irq: ");
     monitor_write_dec(regs.interrupt_number);
     monitor_write("  error-code: ");
     monitor_write_dec(regs.error_code);
