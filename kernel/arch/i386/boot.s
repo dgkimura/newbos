@@ -74,6 +74,8 @@ _start:
     C++ features such as global cunstructors and exceptions will require
     runtime support to work here as well.
     */
+    call init_gdt
+    call init_idt
 
     /*
     Enter the high-level kernel. The ABI requires the stack is 16-byte

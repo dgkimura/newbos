@@ -4,15 +4,9 @@
 #error "Must be compiled with an ix86-elf compiler"
 #endif
 
-extern void init_gdt();
-extern void init_idt();
-
 void
 kernel_main(void)
 {
-    init_gdt();
-    init_idt();
-
     /* Initialize terminal interface */
     monitor_clear();
 

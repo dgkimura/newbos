@@ -93,13 +93,3 @@ interrupt_handler(registers_t regs)
     monitor_write_dec(regs.error_code);
     monitor_write("\n");
 }
-
-void
-irq_handler(registers_t regs)
-{
-    monitor_write("received irq: ");
-    monitor_write_dec(regs.interrupt_number);
-    monitor_write("  error-code: ");
-    monitor_write_dec(regs.error_code);
-    monitor_write("\n");
-}
