@@ -21,6 +21,7 @@ $(ARCHDIR)/irq.c \
 $(ARCHDIR)/irq.s \
 $(ARCHDIR)/gdt.c \
 $(ARCHDIR)/gdt.s \
+$(ARCHDIR)/timer.c \
 $(ARCHDIR)/tty.c \
 
 ARCH_OBJECTS=$(ARCH_SOURCES:.s=.o)

@@ -16,5 +16,4 @@ void monitor_write(char *c);
 
 void monitor_write_dec(uint32_t n);
 
-#endif // MONITOR_H
-
+#endif

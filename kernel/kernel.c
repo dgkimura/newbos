@@ -1,3 +1,4 @@
+#include <newbos/timer.h>
 #include <newbos/tty.h>
 
 #if !defined(__i386__)
@@ -15,4 +16,6 @@ kernel_main(void)
 
     asm volatile ("int $0x3");
     asm volatile ("int $0x4");
+
+    init_timer(50);
 }
