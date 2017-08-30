@@ -19,4 +19,4 @@
 
 typedef void (*irq_t)(registers_t);
 
-void register_interrupt_handler(uint8_t, irq_t handler);
+void register_irq_handler(uint8_t, irq_t handler);

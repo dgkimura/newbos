@@ -167,4 +167,5 @@ irq_common_stub:
     popl    %ds
     addl    $4, %esp
     addl    $4, %esp
+    sti
     iret
