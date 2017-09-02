@@ -10,6 +10,46 @@ extern void idt_flush(uint32_t);
 idt_entry_t idt_entries[256];
 idt_ptr_t   idt_ptr;
 
+typedef void (*isr_t)(registers_t);
+isr_t exception_handlers[32];
+
+char* exception_messages[] =
+{
+    "Divide Error",
+    "Debug Exceptions",
+    "NMI Interrupt",
+    "Breakpoint",
+    "INTO Detected Overflow",
+    "BOUND Range Exceeded",
+    "Invalid Opcode",
+    "Coprocessor Not Available",
+    "Double Exception",
+    "Coprocessor Segment Overrun",
+    "Invalid Task State Segment",
+    "Segment Not Present",
+    "Stack Fault",
+    "General Protection",
+    "Page Fault",
+    "(reserved)",
+    "Coprocessor Error",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)",
+    "(reserved)"
+};
+
 // These extern directives let us access the addresses of our ASM ISR handlers.
 extern void isr0();
 extern void isr1();
@@ -81,6 +121,7 @@ init_idt()
     idt_ptr.base  = (uint32_t)&idt_entries;
 
     memset(&idt_entries, 0, sizeof(idt_entry_t)*256);
+    memset(&exception_handlers, 0, sizeof(isr_t)*32);
 
     // Remap the IRQ table.
     //   Master - command: 0x20, data: 0x21
@@ -151,9 +192,24 @@ init_idt()
 void
 interrupt_handler(registers_t regs)
 {
-    monitor_write("recieved interrupt: ");
-    monitor_write_dec(regs.interrupt_number);
-    monitor_write("  error-code: ");
-    monitor_write_dec(regs.error_code);
-    monitor_write("\n");
+    if (0 != exception_handlers[regs.interrupt_number])
+    {
+        exception_handlers[regs.interrupt_number](regs);
+    }
+    else
+    {
+        monitor_write("Unhandled exception - ");
+        monitor_write_dec(regs.error_code);
+        monitor_write(" : ");
+        monitor_write(exception_messages[regs.interrupt_number]);
+        monitor_write("\n");
+    }
+}
+
+void
+register_interrupt_handler(
+    int number,
+    void (*handler)(registers_t))
+{
+    exception_handlers[number] = handler;
 }

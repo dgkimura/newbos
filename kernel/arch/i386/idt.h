@@ -44,4 +44,6 @@ typedef struct registers
 
 extern void interrupt_handler(registers_t regs);
 
+void register_interrupt_handler(int number, void (*handler)(registers_t));
+
 #endif
