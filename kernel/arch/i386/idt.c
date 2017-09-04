@@ -199,7 +199,7 @@ interrupt_handler(registers_t regs)
     else
     {
         monitor_write("Unhandled exception - ");
-        monitor_write_dec(regs.error_code);
+        monitor_write_dec(regs.interrupt_number);
         monitor_write(" : ");
         monitor_write(exception_messages[regs.interrupt_number]);
         monitor_write("\n");
