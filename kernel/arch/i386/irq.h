@@ -1,3 +1,6 @@
+#ifndef _NEWBOS_IRQ_H
+#define _NEWBOS_IRQ_H
+
 #include <stdint.h>
 
 #define IRQ0 32
@@ -20,3 +23,9 @@
 typedef void (*irq_t)(registers_t);
 
 void register_irq_handler(uint8_t, irq_t handler);
+
+extern void irq_handler(registers_t regs);
+
+void init_irq();
+
+#endif

@@ -25,7 +25,9 @@ struct idt_ptr_struct
 
 typedef struct idt_ptr_struct idt_ptr_t;
 
-void init_idt();
+idt_ptr_t   idt_ptr;
+
+void clear_idt();
 
 typedef struct registers
 {
@@ -42,8 +44,6 @@ typedef struct registers
     uint32_t eip, cs, eflags, useresp, ss;
 } registers_t;
 
-extern void interrupt_handler(registers_t regs);
-
-void register_interrupt_handler(int number, void (*handler)(registers_t));
+void idt_set_gate(uint8_t number, uint32_t base, uint16_t selector, uint8_t flags);
 
 #endif
