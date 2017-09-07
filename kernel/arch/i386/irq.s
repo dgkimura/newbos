@@ -142,7 +142,6 @@ irq_common_stub:
 
     # push interrupt code and interrupt number
     pushl   36(%esp)
-    pushl   36(%esp)
 
     # load the kernel data segment descriptor
     mov     $0x10, %ax
@@ -154,7 +153,6 @@ irq_common_stub:
 
     call    irq_handler
 
-    addl    $4, %esp
     addl    $4, %esp
 
     popl    %esi
