@@ -131,17 +131,13 @@ irq15:
     jmp irq_common_stub
 
 irq_common_stub:
-    pushl   %ds
-    pushl   %eax
-    pushl   %ecx
-    pushl   %edx
-    pushl   %ebx
-    pushl   %esp
-    pushl   %ebp
-    pushl   %esi
+    pusha
 
-    # push interrupt code and interrupt number
-    pushl   36(%esp)
+    # save data segment
+    pushl   %ds
+    pushl   %es
+    pushl   %fs
+    pushl   %gs
 
     # load the kernel data segment descriptor
     mov     $0x10, %ax
@@ -149,20 +145,17 @@ irq_common_stub:
     mov     %ax, %es
     mov     %ax, %fs
     mov     %ax, %gs
-    mov     %ax, %ss
+
+    mov     %esp, %eax
+    push    %eax
 
     call    irq_handler
 
-    addl    $4, %esp
+    pop     %gs
+    pop     %fs
+    pop     %es
+    pop     %ds
 
-    popl    %esi
-    popl    %ebp
-    popl    %esp
-    popl    %ebx
-    popl    %edx
-    popl    %ecx
-    popl    %eax
-    popl    %ds
     addl    $4, %esp
     addl    $4, %esp
     sti
