@@ -287,10 +287,10 @@ isr_common_stub:
     pusha
 
     # save data segment
-    pushl   %ds
-    pushl   %es
-    pushl   %fs
-    pushl   %gs
+    push    %ds
+    push    %es
+    push    %fs
+    push    %gs
 
     # load the kernel data segment descriptor
     mov     $0x10, %ax
@@ -304,10 +304,15 @@ isr_common_stub:
 
     call    interrupt_handler
 
+    pop     %eax
+
+    # restore data segment
     pop     %gs
     pop     %fs
     pop     %es
     pop     %ds
+
+    popa
 
     addl    $4, %esp
     addl    $4, %esp
