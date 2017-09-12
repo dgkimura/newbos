@@ -4,7 +4,7 @@
 
 #include "idt.h"
 
-typedef void (*isr_t)(registers_t);
+typedef void (*isr_t)(registers_t*);
 
 isr_t exception_handlers[32];
 
@@ -118,20 +118,20 @@ init_isr()
 }
 
 void
-interrupt_handler(registers_t regs)
+interrupt_handler(registers_t* regs)
 {
-    if (0 != exception_handlers[regs.interrupt_number])
+    if (0 != exception_handlers[regs->interrupt_number])
     {
-        exception_handlers[regs.interrupt_number](regs);
+        exception_handlers[regs->interrupt_number](regs);
     }
     else
     {
         monitor_write("Unhandled exception - ");
-        monitor_write_dec(regs.interrupt_number);
+        monitor_write_dec(regs->interrupt_number);
         monitor_write(" : [errno - ");
-        monitor_write_dec(regs.error_code);
+        monitor_write_dec(regs->error_code);
         monitor_write("] : ");
-        monitor_write(exception_messages[regs.interrupt_number]);
+        monitor_write(exception_messages[regs->interrupt_number]);
         monitor_write("\n");
     }
 }
@@ -139,7 +139,7 @@ interrupt_handler(registers_t regs)
 void
 register_isr_handler(
     int number,
-    void (*handler)(registers_t))
+    void (*handler)(registers_t*))
 {
     exception_handlers[number] = handler;
 }

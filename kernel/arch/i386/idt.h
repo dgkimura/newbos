@@ -38,7 +38,7 @@ typedef struct registers
     uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
 
     // Interrupt number and error code (if applicable)
-    uint32_t error_code, interrupt_number;
+    uint32_t interrupt_number, error_code;
 
     // Pushed by the processor automatically.
     uint32_t eip, cs, eflags, useresp, ss;

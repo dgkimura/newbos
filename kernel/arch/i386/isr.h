@@ -3,8 +3,8 @@
 
 void init_isr();
 
-extern void interrupt_handler(registers_t regs);
+extern void interrupt_handler(registers_t* regs);
 
-void register_isr_handler(int number, void (*handler)(registers_t));
+void register_isr_handler(int number, void (*handler)(registers_t*));
 
 #endif

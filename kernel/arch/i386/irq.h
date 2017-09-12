@@ -3,28 +3,28 @@
 
 #include <stdint.h>
 
-#define IRQ0 0
-#define IRQ1 1
-#define IRQ2 2
-#define IRQ3 3
-#define IRQ4 4
-#define IRQ5 5
-#define IRQ6 6
-#define IRQ7 7
-#define IRQ8 8
-#define IRQ9 9
-#define IRQ10 10
-#define IRQ11 11
-#define IRQ12 12
-#define IRQ13 13
-#define IRQ14 14
-#define IRQ15 15
+#define IRQ0 32
+#define IRQ1 33
+#define IRQ2 34
+#define IRQ3 35
+#define IRQ4 36
+#define IRQ5 37
+#define IRQ6 38
+#define IRQ7 39
+#define IRQ8 40
+#define IRQ9 41
+#define IRQ10 42
+#define IRQ11 43
+#define IRQ12 44
+#define IRQ13 45
+#define IRQ14 46
+#define IRQ15 47
 
-typedef void (*irq_t)(registers_t);
+typedef void (*irq_t)(registers_t*);
 
 void register_irq_handler(uint8_t, irq_t handler);
 
-extern void irq_handler(registers_t regs);
+extern void irq_handler(registers_t* regs);
 
 void init_irq();
 

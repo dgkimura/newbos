@@ -146,12 +146,13 @@ irq_common_stub:
     mov     %ax, %fs
     mov     %ax, %gs
 
-    mov     %esp, %eax
-    push    %eax
+    # push pointer to structure onto stack
+    push    %esp
 
     call    irq_handler
 
-    pop     %eax
+    # pop pointer to structure from stack
+    add     $4, %esp
 
     # restore data segment
     pop     %gs
@@ -161,6 +162,7 @@ irq_common_stub:
 
     popa
 
+    # remove interrupt and erro code from stack
     addl    $4, %esp
     addl    $4, %esp
     sti

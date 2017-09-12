@@ -64,9 +64,9 @@ register_irq_handler(uint8_t n, irq_t handler)
 }
 
 void
-irq_handler(registers_t regs)
+irq_handler(registers_t* regs)
 {
-    if (regs.interrupt_number >= 40)
+    if (regs->interrupt_number >= 40)
     {
         // send reset signal to slave.
         outb(0xA0, 0x20);
@@ -75,9 +75,9 @@ irq_handler(registers_t regs)
     // send reset signal to master.
     outb(0x20, 0x20);
 
-    if (interrupt_handlers[regs.interrupt_number] != 0)
+    if (interrupt_handlers[regs->interrupt_number] != 0)
     {
-        irq_t handler = interrupt_handlers[regs.interrupt_number];
+        irq_t handler = interrupt_handlers[regs->interrupt_number];
         handler(regs);
     }
 }
