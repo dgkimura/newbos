@@ -130,6 +130,11 @@ irq15:
     push $47
     jmp irq_common_stub
 
+/*
+This is a common IRQ stub. It saves the processor state, sets up for kernel
+mode segments, calls the c-level fault hander, and finally restores the stack
+frame.
+*/
 irq_common_stub:
     pusha
 

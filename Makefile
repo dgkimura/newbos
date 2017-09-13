@@ -18,6 +18,7 @@ $(ARCHDIR)/boot.s \
 $(ARCHDIR)/idt.c \
 $(ARCHDIR)/idt.s \
 $(ARCHDIR)/isr.c \
+$(ARCHDIR)/isr.s \
 $(ARCHDIR)/irq.c \
 $(ARCHDIR)/irq.s \
 $(ARCHDIR)/gdt.c \
