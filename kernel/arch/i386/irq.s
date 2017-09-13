@@ -165,5 +165,9 @@ irq_common_stub:
     # remove interrupt and erro code from stack
     addl    $4, %esp
     addl    $4, %esp
-    sti
     iret
+
+.global enable_interrupts
+.type enable_interrupts, @function
+enable_interrupts:
+    sti
