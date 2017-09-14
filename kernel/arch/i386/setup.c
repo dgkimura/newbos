@@ -1,3 +1,5 @@
+#include <newbos/tty.h>
+
 #include "gdt.h"
 #include "idt.h"
 #include "irq.h"
@@ -10,6 +12,8 @@ extern void enable_interrupts();
 void
 kernel_setup(void)
 {
+    monitor_clear();
+
     init_gdt();
     clear_idt();
 
@@ -19,4 +23,5 @@ kernel_setup(void)
     idt_flush((uint32_t)&idt_ptr);
 
     enable_interrupts();
+    monitor_write("Interrupts enabled.\n");
 }

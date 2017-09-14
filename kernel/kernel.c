@@ -8,14 +8,11 @@
 void
 kernel_main(void)
 {
-    /* Initialize terminal interface */
-    monitor_clear();
-
-    /* Newline support is left as an exercise. */
-    monitor_write("Hello, kernel World!\n");
-
     asm volatile ("int $0x3");
     asm volatile ("int $0x4");
 
-    init_timer(50);
+    init_timer(1000);
+
+    // Loop forever.
+    for (;;);
 }
