@@ -24,6 +24,7 @@ $(ARCHDIR)/irq.s \
 $(ARCHDIR)/gdt.c \
 $(ARCHDIR)/gdt.s \
 $(ARCHDIR)/timer.c \
+$(ARCHDIR)/mm.c \
 $(ARCHDIR)/tty.c \
 $(ARCHDIR)/setup.c \
 
