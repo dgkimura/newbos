@@ -1,5 +1,4 @@
-#include "idt.h"
-#include "irq.h"
+#include "interrupts.h"
 
 #include <newbos/timer.h>
 #include <newbos/tty.h>

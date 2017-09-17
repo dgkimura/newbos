@@ -1,9 +1,7 @@
 #include <newbos/tty.h>
 
 #include "gdt.h"
-#include "idt.h"
-#include "irq.h"
-#include "isr.h"
+#include "interrupts.h"
 
 extern void idt_flush(uint32_t);
 

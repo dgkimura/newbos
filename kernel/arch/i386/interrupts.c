@@ -2,7 +2,32 @@
 
 #include <newbos/tty.h>
 
-#include "idt.h"
+#include "interrupts.h"
+
+idt_entry_t idt_entries[256];
+
+void
+idt_set_gate(uint8_t number, uint32_t base, uint16_t selector, uint8_t flags)
+
+{
+    idt_entries[number].base_lo = base & 0xFFFF;
+    idt_entries[number].base_hi = (base >> 16) & 0xFFFF;
+
+    idt_entries[number].selector = selector;
+    idt_entries[number].always0 = 0;
+    // We must uncomment the OR below when we get to using user-mode.
+    // It sets the interrupt gate's privilege level to 3.
+    idt_entries[number].flags = flags | 0x60;
+}
+
+void
+clear_idt()
+{
+    idt_ptr.limit = sizeof(idt_entry_t) * 256 -1;
+    idt_ptr.base  = (uint32_t)&idt_entries;
+
+    memset(&idt_entries, 0, sizeof(idt_entry_t)*256);
+}
 
 typedef void (*isr_t)(registers_t*);
 
@@ -142,4 +167,83 @@ register_isr_handler(
     void (*handler)(registers_t*))
 {
     exception_handlers[number] = handler;
+}
+
+irq_t interrupt_handlers[256];
+
+extern void irq0();
+extern void irq1();
+extern void irq2();
+extern void irq3();
+extern void irq4();
+extern void irq5();
+extern void irq6();
+extern void irq7();
+extern void irq8();
+extern void irq9();
+extern void irq10();
+extern void irq11();
+extern void irq12();
+extern void irq13();
+extern void irq14();
+extern void irq15();
+
+void
+init_irq()
+{
+    // Remap the IRQ table.
+    //   Master - command: 0x20, data: 0x21
+    //   Slave - command: 0xA0, data: 0xA1
+    outb(0x20, 0x11);
+    outb(0xA0, 0x11);
+    outb(0x21, 0x20);
+    outb(0xA1, 0x28);
+    outb(0x21, 0x04);
+    outb(0xA1, 0x02);
+    outb(0x21, 0x01);
+    outb(0xA1, 0x01);
+    outb(0x21, 0x0);
+    outb(0xA1, 0x0);
+
+    idt_set_gate(32, (uint32_t)irq0, 0x08, 0x8E);
+    idt_set_gate(33, (uint32_t)irq1, 0x08, 0x8E);
+    idt_set_gate(34, (uint32_t)irq2, 0x08, 0x8E);
+    idt_set_gate(35, (uint32_t)irq3, 0x08, 0x8E);
+    idt_set_gate(36, (uint32_t)irq4, 0x08, 0x8E);
+    idt_set_gate(37, (uint32_t)irq5, 0x08, 0x8E);
+    idt_set_gate(38, (uint32_t)irq6, 0x08, 0x8E);
+    idt_set_gate(39, (uint32_t)irq7, 0x08, 0x8E);
+    idt_set_gate(40, (uint32_t)irq8, 0x08, 0x8E);
+    idt_set_gate(41, (uint32_t)irq9, 0x08, 0x8E);
+    idt_set_gate(42, (uint32_t)irq10, 0x08, 0x8E);
+    idt_set_gate(43, (uint32_t)irq11, 0x08, 0x8E);
+    idt_set_gate(44, (uint32_t)irq12, 0x08, 0x8E);
+    idt_set_gate(45, (uint32_t)irq13, 0x08, 0x8E);
+    idt_set_gate(46, (uint32_t)irq14, 0x08, 0x8E);
+    idt_set_gate(47, (uint32_t)irq15, 0x08, 0x8E);
+}
+
+void
+register_irq_handler(uint8_t n, irq_t handler)
+{
+    interrupt_handlers[n] = handler;
+}
+
+void
+irq_handler(registers_t* regs)
+{
+    if (regs->interrupt_number >= 40)
+    {
+        // send reset signal to slave.
+        outb(0xA0, 0x20);
+    }
+
+    // send reset signal to master.
+    outb(0x20, 0x20);
+
+    if (interrupt_handlers[regs->interrupt_number] != 0)
+    {
+        irq_t handler = interrupt_handlers[regs->interrupt_number];
+        handler(regs);
+    }
 }

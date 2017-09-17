@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "idt.h"
+#include "interrupts.h"
 
 typedef struct page
 {

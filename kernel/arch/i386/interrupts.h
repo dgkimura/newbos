@@ -1,5 +1,5 @@
-#ifndef _NEWBOS_IDT_H
-#define _NEWBOS_IDT_H
+#ifndef _NEWBOS_INTERRUPTS_H
+#define _NEWBOS_INTERRUPTS_H
 
 #include <stdint.h>
 
@@ -45,5 +45,36 @@ typedef struct registers
 } registers_t;
 
 void idt_set_gate(uint8_t number, uint32_t base, uint16_t selector, uint8_t flags);
+
+void init_isr();
+
+extern void interrupt_handler(registers_t* regs);
+
+void register_isr_handler(int number, void (*handler)(registers_t*));
+
+#define IRQ0 32
+#define IRQ1 33
+#define IRQ2 34
+#define IRQ3 35
+#define IRQ4 36
+#define IRQ5 37
+#define IRQ6 38
+#define IRQ7 39
+#define IRQ8 40
+#define IRQ9 41
+#define IRQ10 42
+#define IRQ11 43
+#define IRQ12 44
+#define IRQ13 45
+#define IRQ14 46
+#define IRQ15 47
+
+typedef void (*irq_t)(registers_t*);
+
+void register_irq_handler(uint8_t, irq_t handler);
+
+extern void irq_handler(registers_t* regs);
+
+void init_irq();
 
 #endif
