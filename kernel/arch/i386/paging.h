@@ -44,4 +44,6 @@ page_t *get_page(uint32_t address, int make, page_directory_t *directory);
 
 void page_fault(registers_t *regs);
 
+#define PAGE_SIZE 0x1000
+
 #endif
