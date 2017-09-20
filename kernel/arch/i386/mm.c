@@ -3,6 +3,15 @@
 extern uint32_t endkernel;
 uint32_t placement_address = (uint32_t)&endkernel;
 
+static uint32_t kmalloc_internal(uint32_t size, int align,
+                                 uint32_t *physical_address);
+
+uint32_t
+kmalloc(uint32_t size)
+{
+    return kmalloc_internal(size, 0, 0);
+}
+
 uint32_t
 kmalloc_aligned(uint32_t size)
 {
@@ -21,7 +30,7 @@ kmalloc_aligned_physical(uint32_t size, uint32_t *physical_address)
     return kmalloc_internal(size, 1, physical_address);
 }
 
-uint32_t
+static uint32_t
 kmalloc_internal(uint32_t size, int align, uint32_t *physical_address)
 {
     // If the address is not already page-aligned then align it.

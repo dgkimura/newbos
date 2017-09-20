@@ -5,6 +5,8 @@
 
 #include "interrupts.h"
 
+#define PAGE_SIZE 0x1000
+
 typedef struct page
 {
     uint32_t present    : 1;
@@ -44,6 +46,6 @@ page_t *get_page(uint32_t address, int make, page_directory_t *directory);
 
 void page_fault(registers_t *regs);
 
-#define PAGE_SIZE 0x1000
+void init_paging();
 
 #endif

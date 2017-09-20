@@ -22,6 +22,7 @@ $(ARCHDIR)/gdt.s \
 $(ARCHDIR)/timer.c \
 $(ARCHDIR)/mm.c \
 $(ARCHDIR)/paging.c \
+$(ARCHDIR)/paging.s \
 $(ARCHDIR)/tty.c \
 $(ARCHDIR)/setup.c \
 
