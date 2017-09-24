@@ -2,6 +2,7 @@
 
 #include "gdt.h"
 #include "interrupts.h"
+#include "paging.h"
 
 extern void idt_flush(uint32_t);
 
@@ -22,4 +23,6 @@ kernel_setup(void)
 
     enable_interrupts();
     monitor_write("Interrupts enabled.\n");
+
+    init_paging();
 }
