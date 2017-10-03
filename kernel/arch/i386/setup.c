@@ -25,4 +25,7 @@ kernel_setup(void)
     monitor_write("Interrupts enabled.\n");
 
     init_paging();
+    // test paging
+    uint32_t *ptr = (uint32_t *)0xA0000000;
+    uint32_t do_page_fault = *ptr;
 }
