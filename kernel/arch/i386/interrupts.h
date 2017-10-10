@@ -48,7 +48,7 @@ void idt_set_gate(uint8_t number, uint32_t base, uint16_t selector, uint8_t flag
 
 void init_isr();
 
-extern void interrupt_handler(registers_t* regs);
+void interrupt_handler(registers_t* regs);
 
 void register_isr_handler(int number, void (*handler)(registers_t*));
 
@@ -73,7 +73,7 @@ typedef void (*irq_t)(registers_t*);
 
 void register_irq_handler(uint8_t, irq_t handler);
 
-extern void irq_handler(registers_t* regs);
+void irq_handler(registers_t* regs);
 
 void init_irq();
 
