@@ -9,6 +9,7 @@ ARCHDIR=kernel/arch/i386
 
 SOURCES=\
 kernel/kernel.c \
+lib/stdlib.c \
 lib/string.c \
 
 OBJECTS=$(SOURCES:.c=.o)
