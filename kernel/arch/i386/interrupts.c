@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 
 #include <newbos/tty.h>
@@ -158,6 +159,7 @@ interrupt_handler(registers_t* regs)
         monitor_write("] : ");
         monitor_write(exception_messages[regs->interrupt_number]);
         monitor_write("\n");
+        abort();
     }
 }
 
