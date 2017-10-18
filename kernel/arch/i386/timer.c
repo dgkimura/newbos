@@ -8,7 +8,7 @@ uint32_t tick = 0;
 static void
 timer_callback(registers_t* regs)
 {
-    tick++;
+    tick += 1;
     monitor_write("Tick: ");
     monitor_write_dec(tick);
     monitor_write("\n");
