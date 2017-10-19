@@ -1,10 +1,6 @@
 #include <newbos/timer.h>
 #include <newbos/tty.h>
 
-#if !defined(__i386__)
-#error "Must be compiled with an ix86-elf compiler"
-#endif
-
 void
 kernel_main(void)
 {
