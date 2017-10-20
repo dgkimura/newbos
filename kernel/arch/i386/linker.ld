@@ -36,6 +36,7 @@ SECTIONS
     {
         *(COMMON)
         *(.bss)
+        *(.stack)
     }
 
     /* Label indicating the end of the kernel */
