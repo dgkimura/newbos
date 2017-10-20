@@ -1,3 +1,6 @@
+.section .text
+.align 4
+
 .global enable_paging
 .type enable_paging, @function
 enable_paging:
@@ -5,7 +8,7 @@ enable_paging:
     mov %eax, %cr3
 
     mov %cr0, %eax
-    or  0x80000000, %eax
+    or  $0x80000000, %eax
     mov %eax, %cr0
     ret
 

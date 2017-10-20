@@ -16,7 +16,7 @@ uint32_t nframes;
 
 extern uint32_t placement_address;
 
-extern void enable_paging(uint32_t *);
+extern void enable_paging(uint32_t);
 
 extern uint32_t get_fault_address();
 
@@ -149,7 +149,7 @@ void
 switch_page_directory(page_directory_t *directory)
 {
     current_directory = directory;
-    enable_paging(&directory->tables_physical[0]);
+    enable_paging((uint32_t)&directory->physical_tables);
 }
 
 page_t *
@@ -171,7 +171,7 @@ get_page(uint32_t address, int make, page_directory_t *directory)
         directory->tables[table_index] = (page_table_t *)kmalloc_aligned_physical(
             sizeof(page_directory_t), &tmp);
         memset(directory->tables[table_index], 0, PAGE_SIZE);
-        directory->tables_physical[table_index] = tmp | 0x7;
+        directory->physical_tables[table_index] = tmp | 0x7;
         return &directory->tables[table_index]->pages[address % 1024];
     }
     else
@@ -186,13 +186,13 @@ void page_fault(registers_t *regs)
     // The faulting address is stored in the CR2 register.
     uint32_t fault_address = get_fault_address();
 
-    int preset = !(regs->error_code & 0x1);
+    int present = !(regs->error_code & 0x1);
     int rw = regs->error_code & 0x2;
     int user = regs->error_code & 0x4;
     int reserved = regs->error_code & 0x8;
 
     monitor_write("Page fault! (");
-    if (preset)
+    if (present)
     {
         monitor_write("present ");
     }

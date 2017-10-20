@@ -30,7 +30,7 @@ typedef struct page_directory
 
     // Array of pointers to page_tables, but gives their physical location for
     // loading into the CR3 register.
-    uint32_t tables_physical[1024];
+    uint32_t physical_tables[1024];
 
     // The physical address of tables_physical. This comes into play when we
     // get our kernel heap allocated and the directory may be in a different
@@ -45,7 +45,5 @@ void switch_page_directory(page_directory_t *directory);
 page_t *get_page(uint32_t address, int make, page_directory_t *directory);
 
 void page_fault(registers_t *regs);
-
-void init_paging();
 
 #endif
