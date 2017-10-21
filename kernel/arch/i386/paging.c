@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include <newbos/tty.h>
 
@@ -211,4 +212,5 @@ void page_fault(registers_t *regs)
     monitor_write(") at 0x ");
     monitor_write_hex(fault_address);
     monitor_write("\n");
+    abort();
 }
