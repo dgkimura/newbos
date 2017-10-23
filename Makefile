@@ -20,6 +20,7 @@ $(ARCHDIR)/interrupts.c \
 $(ARCHDIR)/interrupts.s \
 $(ARCHDIR)/gdt.c \
 $(ARCHDIR)/gdt.s \
+$(ARCHDIR)/keyboard.c \
 $(ARCHDIR)/timer.c \
 $(ARCHDIR)/mm.c \
 $(ARCHDIR)/paging.c \
