@@ -2,6 +2,7 @@
 
 #include "gdt.h"
 #include "interrupts.h"
+#include "keyboard.h"
 #include "paging.h"
 
 extern void idt_flush(uint32_t);
@@ -28,4 +29,6 @@ kernel_setup(void)
     // test paging
     uint32_t *ptr = (uint32_t *)0xA0000000;
     uint32_t do_page_fault = *ptr;
+
+    init_keyboard();
 }
