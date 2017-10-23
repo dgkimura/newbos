@@ -9,6 +9,14 @@ uint16_t *video_memory = (uint16_t *)0xB8000;
 uint8_t cursor_x = 0;
 uint8_t cursor_y = 0;
 
+uint8_t
+inb(uint16_t port)
+{
+    unsigned char value;
+    asm volatile ("inb %1, %0" : "=a" (value) : "dN" (port));
+    return value;
+}
+
 void
 outb(uint16_t port, uint8_t value)
 {
