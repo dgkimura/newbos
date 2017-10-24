@@ -3,6 +3,7 @@
 #include "gdt.h"
 #include "interrupts.h"
 #include "keyboard.h"
+#include "multiboot.h"
 #include "paging.h"
 
 extern void idt_flush(uint32_t);
@@ -10,7 +11,7 @@ extern void idt_flush(uint32_t);
 extern void enable_interrupts();
 
 void
-kernel_setup(void)
+kernel_setup(multiboot_t *multiboot)
 {
     monitor_clear();
 

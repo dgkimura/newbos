@@ -67,6 +67,12 @@ _start:
     mov $stack_top, %esp
 
     /*
+    Grub bootloader specification states that EBX must contain the 32-bit
+    physical address of the multiboot information structure.
+    */
+    push %ebx
+
+    /*
     This is a good place to initialize crucial processor state before the
     high-level kernel is entered. It's best to minimize the early
     environment where crucial features are offline. Note that the
