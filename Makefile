@@ -22,7 +22,6 @@ $(ARCHDIR)/gdt.c \
 $(ARCHDIR)/gdt.s \
 $(ARCHDIR)/keyboard.c \
 $(ARCHDIR)/timer.c \
-$(ARCHDIR)/mm.c \
 $(ARCHDIR)/paging.c \
 $(ARCHDIR)/paging.s \
 $(ARCHDIR)/tty.c \

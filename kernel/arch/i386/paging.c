@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
+
 #include <newbos/tty.h>
 
-#include "mm.h"
 #include "paging.h"
 
 // The kernel's page directory
@@ -15,17 +15,107 @@ page_directory_t *current_directory = 0;
 uint32_t *frames;
 uint32_t nframes;
 
-extern uint32_t placement_address;
+extern uint32_t endkernel;
 
-extern void enable_paging(uint32_t);
+uint32_t placement_address = (uint32_t)&endkernel;
 
-extern uint32_t get_fault_address();
+extern void
+enable_paging(
+    uint32_t
+);
+
+extern uint32_t
+get_fault_address(
+    void
+);
+
+static uint32_t
+kmalloc(
+    uint32_t size
+);
+
+static uint32_t
+kmalloc_aligned(
+    uint32_t size
+);
+
+static uint32_t
+kmalloc_physical(
+    uint32_t size,
+    uint32_t *physical_address
+);
+
+static uint32_t
+kmalloc_aligned_physical(
+    uint32_t size,
+    uint32_t *physical_address
+);
+
+static uint32_t
+kmalloc_internal(
+    uint32_t size,
+    int align,
+    uint32_t *physical_address
+);
+
+static uint32_t
+kmalloc(
+    uint32_t size)
+{
+    return kmalloc_internal(size, 0, 0);
+}
+
+static uint32_t
+kmalloc_aligned(
+    uint32_t size)
+{
+    return kmalloc_internal(size, 1, 0);
+}
+
+static uint32_t
+kmalloc_physical(
+    uint32_t size,
+    uint32_t *physical_address)
+{
+    return kmalloc_internal(size, 0, physical_address);
+}
+
+static uint32_t
+kmalloc_aligned_physical(
+    uint32_t size,
+    uint32_t *physical_address)
+{
+    return kmalloc_internal(size, 1, physical_address);
+}
+
+static uint32_t
+kmalloc_internal(
+    uint32_t size,
+    int align,
+    uint32_t *physical_address)
+{
+    // If the address is not already page-aligned then align it.
+    if (1 == align && placement_address & 0xFFFFF000)
+    {
+        placement_address &= 0xFFFFF000;
+        placement_address += 0x1000;
+    }
+    if (physical_address)
+    {
+        *physical_address = placement_address;
+    }
+
+    uint32_t tmp = placement_address;
+    placement_address += size;
+    return tmp;
+}
 
 #define INDEX_FROM_BIT(a) (a / (8 * 4))
 #define OFFSET_FROM_BIT(a) (a % (8 * 4))
 
 static void
-set_frame(uint32_t frame_address)
+set_frame(
+    uint32_t frame_address)
 {
     uint32_t frame = frame_address / PAGE_SIZE;
     uint32_t index = INDEX_FROM_BIT(frame);
@@ -34,7 +124,8 @@ set_frame(uint32_t frame_address)
 }
 
 static void
-clear_frame(uint32_t frame_address)
+clear_frame(
+    uint32_t frame_address)
 {
     uint32_t frame = frame_address / PAGE_SIZE;
     uint32_t index = INDEX_FROM_BIT(frame);
@@ -43,7 +134,8 @@ clear_frame(uint32_t frame_address)
 }
 
 static uint32_t
-test_frame(uint32_t frame_address)
+test_frame(
+    uint32_t frame_address)
 {
     uint32_t frame = frame_address / PAGE_SIZE;
     uint32_t index = INDEX_FROM_BIT(frame);
@@ -52,7 +144,8 @@ test_frame(uint32_t frame_address)
 }
 
 static uint32_t
-first_frame()
+first_frame(
+    void)
 {
     uint32_t i, j;
     for (i = 0; i < INDEX_FROM_BIT(nframes); i++)
@@ -72,7 +165,10 @@ first_frame()
 }
 
 void
-alloc_frame(page_t *page, int is_kernel, int is_writable)
+alloc_frame(
+    page_t *page,
+    int is_kernel,
+    int is_writable)
 {
     if (0 != page->frame)
     {
@@ -96,7 +192,8 @@ alloc_frame(page_t *page, int is_kernel, int is_writable)
 }
 
 void
-free_frame(page_t *page)
+free_frame(
+    page_t *page)
 {
     uint32_t frame;
     if (!(frame = page->frame))
@@ -112,7 +209,8 @@ free_frame(page_t *page)
 }
 
 void
-init_paging()
+init_paging(
+    void)
 {
     // The size of physical memory. For the moment we assume it is 16 MB.
     uint32_t memory_end_page = 0x1000000;
@@ -147,14 +245,18 @@ init_paging()
 }
 
 void
-switch_page_directory(page_directory_t *directory)
+switch_page_directory(
+    page_directory_t *directory)
 {
     current_directory = directory;
     enable_paging((uint32_t)&directory->physical_tables);
 }
 
 page_t *
-get_page(uint32_t address, int make, page_directory_t *directory)
+get_page(
+    uint32_t address,
+    int make,
+    page_directory_t *directory)
 {
     // Turn the address into an index.
     address /= PAGE_SIZE;
@@ -181,7 +283,9 @@ get_page(uint32_t address, int make, page_directory_t *directory)
     }
 }
 
-void page_fault(registers_t *regs)
+void
+page_fault(
+    registers_t *regs)
 {
     // A page fault has occurred.
     // The faulting address is stored in the CR2 register.

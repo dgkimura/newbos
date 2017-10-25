@@ -38,12 +38,26 @@ typedef struct page_directory
     uint32_t physical_address;
 } page_directory_t;
 
-void init_paging();
+void
+init_paging(
+    void
+);
 
-void switch_page_directory(page_directory_t *directory);
+void
+switch_page_directory(
+    page_directory_t *directory
+);
 
-page_t *get_page(uint32_t address, int make, page_directory_t *directory);
+page_t *
+get_page(
+    uint32_t address,
+    int make,
+    page_directory_t *directory
+);
 
-void page_fault(registers_t *regs);
+void
+page_fault(
+    registers_t *regs
+);
 
 #endif
