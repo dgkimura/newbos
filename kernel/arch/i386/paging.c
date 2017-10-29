@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include <newbos/tty.h>
+#include <newbos/heap.h>
 
 #include "paging.h"
 
@@ -15,9 +16,7 @@ page_directory_t *current_directory = 0;
 uint32_t *frames;
 uint32_t nframes;
 
-extern uint32_t endkernel;
-
-uint32_t placement_address = (uint32_t)&endkernel;
+extern uint32_t placement_address;
 
 extern void
 enable_paging(
@@ -28,87 +27,6 @@ extern uint32_t
 get_fault_address(
     void
 );
-
-static uint32_t
-kmalloc(
-    uint32_t size
-);
-
-static uint32_t
-kmalloc_aligned(
-    uint32_t size
-);
-
-static uint32_t
-kmalloc_physical(
-    uint32_t size,
-    uint32_t *physical_address
-);
-
-static uint32_t
-kmalloc_aligned_physical(
-    uint32_t size,
-    uint32_t *physical_address
-);
-
-static uint32_t
-kmalloc_internal(
-    uint32_t size,
-    int align,
-    uint32_t *physical_address
-);
-
-static uint32_t
-kmalloc(
-    uint32_t size)
-{
-    return kmalloc_internal(size, 0, 0);
-}
-
-static uint32_t
-kmalloc_aligned(
-    uint32_t size)
-{
-    return kmalloc_internal(size, 1, 0);
-}
-
-static uint32_t
-kmalloc_physical(
-    uint32_t size,
-    uint32_t *physical_address)
-{
-    return kmalloc_internal(size, 0, physical_address);
-}
-
-static uint32_t
-kmalloc_aligned_physical(
-    uint32_t size,
-    uint32_t *physical_address)
-{
-    return kmalloc_internal(size, 1, physical_address);
-}
-
-static uint32_t
-kmalloc_internal(
-    uint32_t size,
-    int align,
-    uint32_t *physical_address)
-{
-    // If the address is not already page-aligned then align it.
-    if (1 == align && placement_address & 0xFFFFF000)
-    {
-        placement_address &= 0xFFFFF000;
-        placement_address += 0x1000;
-    }
-    if (physical_address)
-    {
-        *physical_address = placement_address;
-    }
-
-    uint32_t tmp = placement_address;
-    placement_address += size;
-    return tmp;
-}
 
 #define INDEX_FROM_BIT(a) (a / (8 * 4))
 #define OFFSET_FROM_BIT(a) (a % (8 * 4))

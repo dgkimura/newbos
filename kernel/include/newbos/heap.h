@@ -12,6 +12,28 @@
 #define HEAP_MAGIC          0x123890AB
 #define HEAP_MIN_SIZE       0x00070000
 
+uint32_t
+kmalloc(
+    uint32_t size
+);
+
+uint32_t
+kmalloc_aligned(
+    uint32_t size
+);
+
+uint32_t
+kmalloc_physical(
+    uint32_t size,
+    uint32_t *physical_address
+);
+
+uint32_t
+kmalloc_aligned_physical(
+    uint32_t size,
+    uint32_t *physical_address
+);
+
 /*
  * Size information for a hole/block
  */
