@@ -126,7 +126,56 @@ find_smallest_hole(
 }
 
 static int8_t
-header_t_less_than(void *a, void *b)
+header_t_less_than(
+    void *a,
+    void *b)
 {
     return (((header_t *)a)->size < ((header_t *)b)->size) ? 1 : 0;
+}
+
+heap_t *
+create_heap(
+    uint32_t start,
+    uint32_t end,
+    uint32_t max,
+    uint8_t supervisor,
+    uint8_t readonly)
+{
+    heap_t *heap = (heap_t *)kmalloc(sizeof(heap_t));
+
+    /*
+     * Initialize the index
+     */
+    heap->index = place_ordered_array((void *)start,
+                                      HEAP_INDEX_SIZE,
+                                      &header_t_less_than);
+
+    /*
+     * Shift the start address forward to resemble where we can start putting
+     * data.
+     */
+    start += sizeof(type_t) * HEAP_INDEX_SIZE;
+
+    /*
+     * Make sure the start address is page-aligned.
+     */
+    if (start & 0xFFFFF000 != 0)
+    {
+        start &= 0xFFFFF000;
+        start += 0x1000;
+    }
+
+    heap->start_address = start;
+    heap->end_address = end;
+    heap->max_address = max;
+    heap->supervisor = supervisor;
+    heap->readonly = readonly;
+
+    header_t *hole = (header_t *)start;
+    hole->size = end - start;
+    hole->magic = HEAP_MAGIC;
+    hole->is_hole = 1;
+    insert_ordered_array((void *)hole, &heap->index);
+
+    return heap;
 }

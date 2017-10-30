@@ -9,7 +9,7 @@ standard_less_than_predicate(
 }
 
 ordered_array_t
-place_ordereed_array(
+place_ordered_array(
     void *address,
     uint32_t max_size,
     less_than_predicate_t less_than)
