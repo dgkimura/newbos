@@ -1,6 +1,10 @@
 #include <newbos/heap.h>
 
+#include "paging.h"
+
 extern uint32_t endkernel;
+
+extern page_directory_t *kernel_directory;
 
 uint32_t placement_address = (uint32_t)&endkernel;
 
@@ -51,7 +55,7 @@ kmalloc_internal(
     if (1 == align && placement_address & 0xFFFFF000)
     {
         placement_address &= 0xFFFFF000;
-        placement_address += 0x1000;
+        placement_address += PAGE_SIZE;
     }
     if (physical_address)
     {
@@ -91,7 +95,7 @@ find_smallest_hole(
 
             if (((location + sizeof(header_t)) & 0xFFFFF000) != 0)
             {
-                offset = 0x1000 - (location + sizeof(header_t)) % 0x1000;
+                offset = PAGE_SIZE - (location + sizeof(header_t)) % PAGE_SIZE;
             }
 
             int32_t hole_size = (int32_t)header->size - offset;
@@ -162,7 +166,7 @@ create_heap(
     if ((start & 0xFFFFF000) != 0)
     {
         start &= 0xFFFFF000;
-        start += 0x1000;
+        start += PAGE_SIZE;
     }
 
     heap->start_address = start;
@@ -178,4 +182,69 @@ create_heap(
     insert_ordered_array((void *)hole, &heap->index);
 
     return heap;
+}
+
+static void
+expand(
+    uint32_t new_size,
+    heap_t *heap)
+{
+    /*
+     * Get the nearest page boundary.
+     */
+    if ((new_size & 0xFFFFF000) != 0)
+    {
+        new_size &= 0xFFFFF000;
+        new_size += PAGE_SIZE;
+    }
+
+    /*
+     * This should always be on a page boundary.
+     */
+    uint32_t old_size = heap->end_address - heap->start_address;
+    uint32_t i = old_size;
+
+    while (i < new_size)
+    {
+        alloc_frame(get_page(heap->start_address + i, 1, kernel_directory),
+                    (heap->supervisor) ? 1 : 0, (heap->readonly) ? 0 : 1);
+        i += PAGE_SIZE;
+    }
+
+    heap->end_address = heap->start_address + new_size;
+}
+
+static uint32_t
+contract(
+    uint32_t new_size,
+    heap_t *heap)
+{
+    /*
+     * Get the nearest following page boundary.
+     */
+    if (new_size & PAGE_SIZE)
+    {
+        new_size &= PAGE_SIZE;
+        new_size += PAGE_SIZE;
+    }
+
+    /*
+     * Don't contract too far!
+     */
+    if (new_size < HEAP_MIN_SIZE)
+    {
+        new_size = HEAP_MIN_SIZE;
+    }
+
+    uint32_t old_size = heap->end_address - heap->start_address;
+    uint32_t i = old_size - PAGE_SIZE;
+
+    while (new_size < i)
+    {
+        free_frame(get_page(heap->start_address + i, 0, kernel_directory));
+        i -= PAGE_SIZE;
+    }
+
+    heap->end_address = heap->start_address + new_size;
+    return new_size;
 }

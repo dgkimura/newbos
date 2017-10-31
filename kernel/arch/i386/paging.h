@@ -60,4 +60,11 @@ page_fault(
     registers_t *regs
 );
 
+void
+alloc_frame(
+    page_t *page,
+    int is_kernel,
+    int is_writable
+);
+
 #endif

@@ -9,7 +9,6 @@ ARCHDIR=kernel/arch/i386
 
 SOURCES=\
 kernel/kernel.c \
-kernel/heap.c \
 kernel/ordered_array.c \
 lib/stdlib.c \
 lib/string.c \
@@ -22,6 +21,7 @@ $(ARCHDIR)/interrupts.c \
 $(ARCHDIR)/interrupts.s \
 $(ARCHDIR)/gdt.c \
 $(ARCHDIR)/gdt.s \
+$(ARCHDIR)/heap.c \
 $(ARCHDIR)/keyboard.c \
 $(ARCHDIR)/timer.c \
 $(ARCHDIR)/paging.c \
