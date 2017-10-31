@@ -89,7 +89,7 @@ find_smallest_hole(
             uint32_t location = (uint32_t)header;
             int32_t offset = 0;
 
-            if ((location + sizeof(header_t)) & 0xFFFFF000 != 0)
+            if (((location + sizeof(header_t)) & 0xFFFFF000) != 0)
             {
                 offset = 0x1000 - (location + sizeof(header_t)) % 0x1000;
             }
@@ -159,7 +159,7 @@ create_heap(
     /*
      * Make sure the start address is page-aligned.
      */
-    if (start & 0xFFFFF000 != 0)
+    if ((start & 0xFFFFF000) != 0)
     {
         start &= 0xFFFFF000;
         start += 0x1000;
