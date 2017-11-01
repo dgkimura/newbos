@@ -67,4 +67,9 @@ alloc_frame(
     int is_writable
 );
 
+void
+free_frame(
+    page_t *page
+);
+
 #endif
