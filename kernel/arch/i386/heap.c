@@ -51,7 +51,9 @@ kmalloc_internal(
     int align,
     uint32_t *physical_address)
 {
-    // If the address is not already page-aligned then align it.
+    /*
+     * If the address is not already page-aligned then align it.
+     */
     if (1 == align && placement_address & 0xFFFFF000)
     {
         placement_address &= 0xFFFFF000;
@@ -429,4 +431,126 @@ alloc(
     }
 
     return (void *)((uint32_t)block_header + sizeof(header_t));
+}
+
+void
+free(
+    void *p,
+    heap_t *heap)
+{
+    if (p == 0)
+    {
+        /*
+         * Exit gracefully for null pointers.
+         */
+        return;
+    }
+
+    header_t *header = (header_t *)((uint32_t)p - sizeof(header_t));
+    footer_t *footer = (footer_t *)((uint32_t)header + header->size -
+                                              sizeof(footer_t));
+
+    /*
+     * Make us a hole.
+     */
+    header->is_hole = 1;
+
+    /*
+     * Do we want to add this header into the 'free holes' index?
+     */
+    uint8_t do_add = 1;
+
+    /*
+     * Unify left if the thing immediately to the left of us is a footer.
+     */
+    footer_t *test_footer = (footer_t *)((uint32_t)header - sizeof(footer_t));
+    if (test_footer->magic == HEAP_MAGIC && test_footer->header->is_hole == 1)
+    {
+        /*
+         * Cache is our current size
+         */
+        uint32_t cache_size = header->size;
+        header = test_footer->header;
+        footer->header = header;
+        header->size += cache_size;
+
+        /*
+         * Since this header is already in the index, we don't want to add it
+         * again.
+         */
+        do_add = 0;
+    }
+
+    /*
+     * Unify right if the thing immediately to the right of us is a header.
+     */
+    header_t *test_header = (header_t *)((uint32_t)footer + sizeof(footer_t));
+    if (test_header->magic == HEAP_MAGIC && test_header->is_hole)
+    {
+        /*
+         * Increase our size.
+         */
+        header->size += test_header->size;
+        test_footer = (footer_t *)((uint32_t)test_header + test_header->size -
+                                             sizeof(footer_t));
+        footer = test_footer;
+
+        uint32_t iterator = 0;
+        for (; (iterator < heap->index.size) &&
+               (lookup_ordered_array(iterator, &heap->index) !=
+                   (void *)test_header)
+             ; iterator++);
+
+        remove_ordered_array(iterator, &heap->index);
+    }
+
+    /*
+     * If the footer location is the end address, we can contract.
+     */
+    if ((uint32_t)footer + sizeof(footer_t) == heap->end_address)
+    {
+        uint32_t old_length = heap->end_address - heap->start_address;
+        uint32_t new_length = contract((uint32_t)header - heap->start_address,
+                                       heap);
+        /*
+         * Check how big we will be after resizing.
+         */
+        if (header->size - (old_length - new_length) > 0)
+        {
+            /*
+             * We will still exist, so resize us.
+             */
+            header->size -= old_length - new_length;
+            footer = (footer_t *)((uint32_t)header + header->size -
+                                            sizeof(footer_t));
+            footer->magic = HEAP_MAGIC;
+            footer->header = header;
+        }
+        else
+        {
+            /*
+             * We will no longer exist. Remove us from the index.
+             */
+            uint32_t iterator = 0;
+            for (; (iterator < heap->index.size) &&
+                   (lookup_ordered_array(iterator, &heap->index) !=
+                       (void *)test_header)
+                 ; iterator++)
+            /*
+             * If we didn't find ourselves, we have nothing to remove.
+             */
+            if (iterator < heap->index.size)
+            {
+                remove_ordered_array(iterator, &heap->index);
+            }
+        }
+    }
+
+    /*
+     * If required, add us to the index.
+     */
+    if (do_add == 1)
+    {
+        insert_ordered_array((void *)header, &heap->index);
+    }
 }
