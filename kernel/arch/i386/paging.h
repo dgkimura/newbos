@@ -25,16 +25,22 @@ typedef struct page_table
 
 typedef struct page_directory
 {
-    // Array of poitners to page tables.
+    /*
+     * Array of poitners to page tables.
+     */
     page_table_t *tables[1024];
 
-    // Array of pointers to page_tables, but gives their physical location for
-    // loading into the CR3 register.
+    /*
+     * Array of pointers to page_tables, but gives their physical location for
+     * loading into the CR3 register.
+     */
     uint32_t physical_tables[1024];
 
-    // The physical address of tables_physical. This comes into play when we
-    // get our kernel heap allocated and the directory may be in a different
-    // location in virtual memory.
+    /*
+     * The physical address of tables_physical. This comes into play when we
+     * get our kernel heap allocated and the directory may be in a different
+     * location in virtual memory.
+     */
     uint32_t physical_address;
 } page_directory_t;
 

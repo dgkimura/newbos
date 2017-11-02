@@ -6,13 +6,19 @@
 
 #include "paging.h"
 
-// The kernel's page directory
+/*
+ * The kernel's page directory
+ */
 page_directory_t *kernel_directory = 0;
 
-// The current page directory
+/*
+ * The current page directory
+ */
 page_directory_t *current_directory = 0;
 
-// Used/free bitmap of frames
+/*
+ * Used/free bitmap of frames
+ */
 uint32_t *frames;
 uint32_t nframes;
 
@@ -90,7 +96,9 @@ alloc_frame(
 {
     if (0 != page->frame)
     {
-        // Frame was already allocated.
+        /*
+         * Frame was already allocated.
+         */
         return;
     }
     else
@@ -116,7 +124,9 @@ free_frame(
     uint32_t frame;
     if (!(frame = page->frame))
     {
-        // Page didn't actually have an allocated frame.
+        /*
+         * Page didn't actually have an allocated frame.
+         */
         return;
     }
     else
@@ -130,24 +140,30 @@ void
 init_paging(
     void)
 {
-    // The size of physical memory. For the moment we assume it is 16 MB.
+    /*
+     * The size of physical memory. For the moment we assume it is 16 MB.
+     */
     uint32_t memory_end_page = 0x1000000;
 
     nframes = memory_end_page / PAGE_SIZE;
     frames = (uint32_t *)kmalloc(INDEX_FROM_BIT(nframes));
     memset(frames, 0, INDEX_FROM_BIT(nframes));
 
-    // Let's make a page directory.
+    /*
+     * Let's make a page directory.
+     */
     kernel_directory = (page_directory_t *)kmalloc_aligned(sizeof(page_directory_t));
     memset(kernel_directory, 0, sizeof(page_directory_t));
     current_directory = kernel_directory;
 
-    // We need to identify map (physical address = virtual address) from 0x0 to
-    // the end of used memory, so we can access this transparently, as if
-    // paging wasn't enabled. NOTE that we use a while loop here deliberately.
-    // Inside the loop body we actually change placement_address by calling
-    // kmalloc(). A while loop causes this to be computed on-the-fly rather
-    // than once at start.
+    /*
+     * We need to identify map (physical address = virtual address) from 0x0 to
+     * the end of used memory, so we can access this transparently, as if
+     * paging wasn't enabled. NOTE that we use a while loop here deliberately.
+     * Inside the loop body we actually change placement_address by calling
+     * kmalloc(). A while loop causes this to be computed on-the-fly rather
+     * than once at start.
+     */
     uint32_t i = 0;
     while (i < placement_address)
     {
@@ -155,10 +171,14 @@ init_paging(
         i += PAGE_SIZE;
     }
 
-    // Before we enable paging, we must register our page fault handler.
+    /*
+     * Before we enable paging, we must register our page fault handler.
+     */
     register_isr_handler(14, page_fault);
 
-    // Now, enable paging!
+    /*
+     * Now, enable paging!
+     */
     switch_page_directory(kernel_directory);
 }
 
@@ -176,10 +196,14 @@ get_page(
     int make,
     page_directory_t *directory)
 {
-    // Turn the address into an index.
+    /*
+     * Turn the address into an index.
+     */
     address /= PAGE_SIZE;
 
-    // Find the page table containing this address.
+    /*
+     * Find the page table containing this address.
+     */
     uint32_t table_index = address / 1024;
 
     if (directory->tables[table_index])
@@ -205,8 +229,10 @@ void
 page_fault(
     registers_t *regs)
 {
-    // A page fault has occurred.
-    // The faulting address is stored in the CR2 register.
+    /*
+     * A page fault has occurred.
+     * The faulting address is stored in the CR2 register.
+     */
     uint32_t fault_address = get_fault_address();
 
     int present = !(regs->error_code & 0x1);
