@@ -17,6 +17,7 @@ place_ordered_array(
     ordered_array_t to_ret;
     to_ret.array = (type_t *)address;
     to_ret.size = 0;
+    to_ret.max_size = max_size;
     to_ret.less_than = less_than;
     return to_ret;
 }
