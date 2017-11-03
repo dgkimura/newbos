@@ -24,6 +24,8 @@ uint32_t nframes;
 
 extern uint32_t placement_address;
 
+extern heap_t *heap;
+
 extern void
 enable_paging(
     uint32_t
@@ -157,6 +159,19 @@ init_paging(
     current_directory = kernel_directory;
 
     /*
+     * Map some pages in the kernel heap area. Here we call get_page but not
+     * alloc_page. This causes page_table_t's to be created where necessary. We
+     * can't allocate frames yet because they need to be identity mapped first
+     * below, and yet we can't increase placement_address between identity
+     * mapping and enabling the heap!
+     */
+    for (uint32_t i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE;
+         i += PAGE_SIZE)
+    {
+        get_page(i, 1, kernel_directory);
+    }
+
+    /*
      * We need to identify map (physical address = virtual address) from 0x0 to
      * the end of used memory, so we can access this transparently, as if
      * paging wasn't enabled. NOTE that we use a while loop here deliberately.
@@ -164,11 +179,18 @@ init_paging(
      * kmalloc(). A while loop causes this to be computed on-the-fly rather
      * than once at start.
      */
-    uint32_t i = 0;
-    while (i < placement_address)
+    for (uint32_t i = 0; i < placement_address; i += PAGE_SIZE)
     {
         alloc_frame(get_page(i, 1, kernel_directory), 0, 0);
-        i += PAGE_SIZE;
+    }
+
+    /*
+     * Now allocate those pages we mapped earlier without allocating frames.
+     */
+    for (uint32_t i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE;
+         i += PAGE_SIZE)
+    {
+        alloc_frame(get_page(i, 1, kernel_directory), 0, 0);
     }
 
     /*
@@ -180,6 +202,11 @@ init_paging(
      * Now, enable paging!
      */
     switch_page_directory(kernel_directory);
+
+    /*
+     * Initialize the kernel heap.
+     */
+    heap = create_heap(KHEAP_START, KHEAP_START, 0xCFFFF000, 0, 0);
 }
 
 void

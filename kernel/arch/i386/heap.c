@@ -8,6 +8,8 @@ extern page_directory_t *kernel_directory;
 
 uint32_t placement_address = (uint32_t)&endkernel;
 
+heap_t *heap=0;
+
 static uint32_t
 kmalloc_internal(
     uint32_t size,
@@ -51,22 +53,36 @@ kmalloc_internal(
     int align,
     uint32_t *physical_address)
 {
-    /*
-     * If the address is not already page-aligned then align it.
-     */
-    if (1 == align && placement_address & 0xFFFFF000)
+    if (heap != 0)
     {
-        placement_address &= 0xFFFFF000;
-        placement_address += PAGE_SIZE;
+        void *address = alloc(size, (uint8_t)align, heap);
+        if (physical_address != 0)
+        {
+            page_t *page = get_page((uint32_t)address, 0, kernel_directory);
+            *physical_address = page->frame * PAGE_SIZE +
+                                ((uint32_t)address & 0xFFF);
+        }
+        return (uint32_t)address;
     }
-    if (physical_address)
+    else
     {
-        *physical_address = placement_address;
-    }
+        /*
+         * If the address is not already page-aligned then align it.
+         */
+        if (1 == align && placement_address & 0xFFFFF000)
+        {
+            placement_address &= 0xFFFFF000;
+            placement_address += PAGE_SIZE;
+        }
+        if (physical_address)
+        {
+            *physical_address = placement_address;
+        }
 
-    uint32_t tmp = placement_address;
-    placement_address += size;
-    return tmp;
+        uint32_t tmp = placement_address;
+        placement_address += size;
+        return tmp;
+    }
 }
 
 static int32_t
