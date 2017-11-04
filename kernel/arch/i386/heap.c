@@ -570,3 +570,9 @@ free(
         insert_ordered_array((void *)header, &heap->index);
     }
 }
+
+void kfree(
+    void *p)
+{
+    free(p, heap);
+}

@@ -34,6 +34,10 @@ kmalloc_aligned_physical(
     uint32_t *physical_address
 );
 
+void kfree(
+    void *p
+);
+
 /*
  * Size information for a hole/block
  */
