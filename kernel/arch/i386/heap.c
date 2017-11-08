@@ -409,7 +409,7 @@ alloc(
     /*
      * Overwrite the original header and footer.
      */
-    header_t *block_header = (header_t *)orig_hole_header;
+    header_t *block_header = (header_t *)orig_hole_pos;
     block_header->magic = HEAP_MAGIC;
     block_header->is_hole = 0;
     block_header->size = new_size;
