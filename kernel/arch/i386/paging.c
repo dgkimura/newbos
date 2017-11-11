@@ -177,9 +177,10 @@ init_paging(
      * paging wasn't enabled. NOTE that we use a while loop here deliberately.
      * Inside the loop body we actually change placement_address by calling
      * kmalloc(). A while loop causes this to be computed on-the-fly rather
-     * than once at start.
+     * than once at start. Allocate an extra PAGE so the kernel heap can be
+     * initialized properly.
      */
-    for (uint32_t i = 0; i < placement_address; i += PAGE_SIZE)
+    for (uint32_t i = 0; i < placement_address + PAGE_SIZE; i += PAGE_SIZE)
     {
         alloc_frame(get_page(i, 1, kernel_directory), 0, 0);
     }
