@@ -69,7 +69,7 @@ kmalloc_internal(
         /*
          * If the address is not already page-aligned then align it.
          */
-        if (1 == align && placement_address & 0xFFFFF000)
+        if (1 == align && (placement_address & 0xFFFFF000))
         {
             placement_address &= 0xFFFFF000;
             placement_address += PAGE_SIZE;
