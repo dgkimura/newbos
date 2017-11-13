@@ -413,7 +413,7 @@ alloc(
     block_header->magic = HEAP_MAGIC;
     block_header->is_hole = 0;
     block_header->size = new_size;
-    footer_t *block_footer = (footer_t *)(orig_hole_pos - sizeof(footer_t) +
+    footer_t *block_footer = (footer_t *)(orig_hole_pos + sizeof(footer_t) +
                                           size);
     block_footer->magic = HEAP_MAGIC;
     block_footer->header = block_header;
