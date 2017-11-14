@@ -24,8 +24,6 @@ uint32_t nframes;
 
 extern uint32_t placement_address;
 
-extern heap_t *heap;
-
 extern void
 enable_paging(
     uint32_t
@@ -207,7 +205,7 @@ init_paging(
     /*
      * Initialize the kernel heap.
      */
-    heap = create_heap(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE,
+    create_heap(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE,
                        0xCFFFF000, 0, 0);
 }
 

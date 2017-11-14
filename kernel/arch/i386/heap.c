@@ -1,4 +1,5 @@
 #include <newbos/heap.h>
+#include <newbos/ordered_array.h>
 
 #include "paging.h"
 
@@ -8,7 +9,90 @@ extern page_directory_t *kernel_directory;
 
 uint32_t placement_address = (uint32_t)&endkernel;
 
-heap_t *heap=0;
+/*
+ * Size information for a hole/block
+ */
+typedef struct
+{
+    /*
+     * Magic number, used for error checking and identification.
+     */
+    uint32_t magic;
+
+    /*
+     * 1 if this is a hole. 0 if this is a block.
+     */
+    uint8_t is_hole;
+
+    /*
+     * Size of the block, including the end footer.
+     */
+    uint32_t size;
+} header_t;
+
+typedef struct
+{
+    /*
+     * Magic number, same as in header_t.
+     */
+    uint32_t magic;
+
+    /*
+     * Pointer to the block header.
+     */
+    header_t * header;
+} footer_t;
+
+typedef struct
+{
+    ordered_array_t index;
+
+    /*
+     * The start of our allocated space.
+     */
+    uint32_t start_address;
+
+    /*
+     * The end of our allocated space. May be expanded up to max_address.
+     */
+    uint32_t end_address;
+
+    /*
+     * The maximum address the heap can be expanded to.
+     */
+    uint32_t max_address;
+
+    /*
+     * Should extra pages requested by us be mapped as supervisor-only?
+     */
+    uint8_t supervisor;
+
+    /*
+     * Should extra pages requested by us be mapped as read-only?
+     */
+    uint8_t readonly;
+} heap_t;
+
+heap_t *kheap=0;
+
+/*
+ * Allocates a contiguous region of memory 'sizes' in size. If page_aligned==1,
+ * it creates that block starting on a page boundary.
+ */
+static void *alloc(
+    size_t size,
+    uint8_t page_align,
+    heap_t *heap
+);
+
+/*
+ * Releases a block allocated with 'alloc'.
+ */
+static void
+free(
+    void *p,
+    heap_t *heap
+);
 
 static uint32_t
 kmalloc_internal(
@@ -53,9 +137,9 @@ kmalloc_internal(
     int align,
     uint32_t *physical_address)
 {
-    if (heap != 0)
+    if (kheap != 0)
     {
-        void *address = alloc(size, (uint8_t)align, heap);
+        void *address = alloc(size, (uint8_t)align, kheap);
         if (physical_address != 0)
         {
             page_t *page = get_page((uint32_t)address, 0, kernel_directory);
@@ -155,7 +239,7 @@ header_t_less_than(
     return (((header_t *)a)->size < ((header_t *)b)->size) ? 1 : 0;
 }
 
-heap_t *
+void
 create_heap(
     uint32_t start,
     uint32_t end,
@@ -199,7 +283,7 @@ create_heap(
     hole->is_hole = 1;
     insert_ordered_array((void *)hole, &heap->index);
 
-    return heap;
+    kheap = heap;
 }
 
 static void
@@ -574,5 +658,5 @@ free(
 void kfree(
     void *p)
 {
-    free(p, heap);
+    free(p, kheap);
 }
