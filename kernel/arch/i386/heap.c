@@ -1,5 +1,6 @@
+#include <string.h>
+
 #include <newbos/heap.h>
-#include <newbos/ordered_array.h>
 
 #include "paging.h"
 
@@ -8,6 +9,129 @@ extern uint32_t endkernel;
 extern page_directory_t *kernel_directory;
 
 uint32_t placement_address = (uint32_t)&endkernel;
+
+/*
+ * This array is insertion sorted - it always remains in a sorted state
+ * (between calls). It can store anything that can be cast to void * -- so a
+ * uint32_t, or any pointer
+ */
+typedef void *type_t;
+
+/*
+ * A predicate should return non-zero if the fierst argument is less than the
+ * second. Else it should return zero.
+ */
+typedef int8_t (*less_than_predicate_t)(type_t, type_t);
+
+typedef struct
+{
+    type_t *array;
+    uint32_t size;
+    uint32_t max_size;
+    less_than_predicate_t less_than;
+} ordered_array_t;
+
+static ordered_array_t
+place_ordered_array(
+    void *address,
+    uint32_t max_size,
+    less_than_predicate_t less_than
+);
+
+/*
+ * Add an item into the array.
+ */
+static void
+insert_ordered_array(
+    type_t item,
+    ordered_array_t *array
+);
+
+/*
+ * Lookup the item at index i.
+ */
+static type_t
+lookup_ordered_array(
+    uint32_t index,
+    ordered_array_t *array
+);
+
+/*
+ * Delete the item at index i.
+ */
+static void
+remove_ordered_array(
+    uint32_t index,
+    ordered_array_t *array
+);
+
+static ordered_array_t
+place_ordered_array(
+    void *address,
+    uint32_t max_size,
+    less_than_predicate_t less_than)
+{
+    ordered_array_t to_ret;
+    to_ret.array = (type_t *)address;
+    to_ret.size = 0;
+    memset(to_ret.array, 0, max_size * sizeof(type_t *));
+    to_ret.max_size = max_size;
+    to_ret.less_than = less_than;
+    return to_ret;
+}
+
+static void
+insert_ordered_array(
+    type_t item,
+    ordered_array_t *array)
+{
+    uint32_t index = 0;
+    for (; index < array->size &&
+           array->less_than(array->array[index], item); index++);
+
+    if (index == array->size)
+    {
+        /*
+         * Add item to the end of the array
+         */
+        array->array[array->size++] = item;
+    }
+    else
+    {
+        type_t tmp = array->array[index];
+        array->array[index] = item;
+
+        while (index < array->size)
+        {
+            index += 1;
+            type_t tmp2 = array->array[index];
+            array->array[index] = tmp;
+            tmp = tmp2;
+        }
+        array->size += 1;
+    }
+}
+
+static type_t
+lookup_ordered_array(
+    uint32_t index,
+    ordered_array_t *array)
+{
+    return array->array[index];
+}
+
+static void
+remove_ordered_array(
+    uint32_t index,
+    ordered_array_t *array)
+{
+    while (index < array->size)
+    {
+        array->array[index] = array->array[index+1];
+        index += 1;
+    }
+    array->size -= 1;
+}
 
 /*
  * Size information for a hole/block

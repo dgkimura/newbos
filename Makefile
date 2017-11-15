@@ -9,7 +9,6 @@ ARCHDIR=kernel/arch/i386
 
 SOURCES=\
 kernel/kernel.c \
-kernel/ordered_array.c \
 lib/stdlib.c \
 lib/string.c \
 
