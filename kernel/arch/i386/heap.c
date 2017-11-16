@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <string.h>
 
 #include <newbos/heap.h>
@@ -342,17 +343,7 @@ find_smallest_hole(
         index += 1;
     }
 
-    if (index == heap->index.size)
-    {
-        /*
-         * We got to the end and couldn't find anything.
-         */
-        return -1;
-    }
-    else
-    {
-        return index;
-    }
+    return index;
 }
 
 static int8_t
@@ -489,9 +480,9 @@ alloc(
     /*
      * Find the smallest hole that will fit.
      */
-    int32_t iterator = find_smallest_hole(new_size, page_align, heap);
+    uint32_t iterator = find_smallest_hole(new_size, page_align, heap);
 
-    if (iterator == -1)
+    if (iterator == heap->index.size)
     {
         /*
          * We didn't find a suitable hole.
@@ -515,7 +506,8 @@ alloc(
          * Variables to hole the index and value of the endmost header found
          * so far.
          */
-        uint32_t idx = -1;
+        int32_t idx;
+        bool found_header = false;
         uint32_t value = 0x0;
         while (iterator < heap->index.size)
         {
@@ -525,6 +517,7 @@ alloc(
             {
                 value = tmp;
                 idx = iterator;
+                found_header = true;
             }
             iterator += 1;
         }
@@ -532,7 +525,7 @@ alloc(
         /*
          * If we didn't find any headers, we need to add one.
          */
-        if (idx == -1)
+        if (!found_header)
         {
             header_t *header = (header_t *)old_end_address;
             header->magic = HEAP_MAGIC;
