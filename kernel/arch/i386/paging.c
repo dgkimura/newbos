@@ -217,6 +217,117 @@ switch_page_directory(
     enable_paging((uint32_t)&directory->physical_tables);
 }
 
+page_directory_t *
+clone_page_directory(
+    page_directory_t *source)
+{
+    uint32_t physical;
+
+    /*
+     * Make a new page directory and obtain its physical address.
+     */
+    page_directory_t *directory = (page_directory_t *)
+        kmalloc_aligned_physical(sizeof(page_directory_t), &physical);
+    memset(directory, 0, sizeof(page_directory_t));
+
+    /*
+     * Get the offset of physical_tables from the start of the page_directory_t
+     * structure.
+     */
+    uint32_t offset = (uint32_t)directory->physical_tables -
+                      (uint32_t)directory;
+
+    /*
+     * Then the physical address of directory is...
+     */
+    directory->physical_address = physical + offset;
+
+    /*
+     * Go through each page table. If the page table is in the kernel
+     * directory, do not need to make a copy.
+     */
+    for (int i = 0; i < 1024; i++)
+    {
+        if (!(source->tables[i]))
+        {
+            continue;
+        }
+
+        if (kernel_directory->tables[i] == source->tables[i])
+        {
+            /*
+             * It's in the kernel, so just use the same pointer.
+             */
+            directory->tables[i] = source->tables[i];
+            directory->physical_tables[i] = source->physical_tables[i];
+        }
+        else
+        {
+            /*
+             * Copy the table.
+             */
+            uint32_t physical;
+            directory->tables[i] = clone_page_table(source->tables[i],
+                                                    &physical);
+            directory->physical_tables[i] = physical | 0x07;
+        }
+    }
+    return directory;
+}
+
+page_table_t *
+clone_page_table(
+    page_table_t *source,
+    uint32_t *physical_address)
+{
+    /*
+     * Make a new page table, which is page aligned.
+     */
+    page_table_t *table = (page_table_t *)kmalloc_aligned_physical(
+        sizeof(page_table_t), physical_address);
+
+    memset(table, 0, sizeof(page_table_t));
+
+    for (int i = 0; i < 1024; i++)
+    {
+        if (source->pages[i].frame)
+        {
+            /*
+             * Get a new frame.
+             */
+            alloc_frame(&table->pages[i], 0, 0);
+            if (source->pages[i].present)
+            {
+                table->pages[i].present = 1;
+            }
+            if (source->pages[i].rw)
+            {
+                table->pages[i].rw = 1;
+            }
+            if (source->pages[i].user)
+            {
+                table->pages[i].user = 1;
+            }
+            if (source->pages[i].accessed)
+            {
+                table->pages[i].accessed = 1;
+            }
+            if (source->pages[i].dirty)
+            {
+                table->pages[i].dirty = 1;
+            }
+
+            /*
+             * Physically copy the data across.
+             */
+            copy_page_physical(source->pages[i].frame * PAGE_SIZE,
+                               table->pages[i].frame * PAGE_SIZE);
+        }
+    }
+
+    return table;
+}
+
 page_t *
 get_page(
     uint32_t address,

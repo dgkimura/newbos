@@ -54,6 +54,17 @@ switch_page_directory(
     page_directory_t *directory
 );
 
+page_directory_t *
+clone_page_directory(
+    page_directory_t *source
+);
+
+page_table_t *
+clone_page_table(
+    page_table_t *source,
+    uint32_t *physical_address
+);
+
 page_t *
 get_page(
     uint32_t address,
