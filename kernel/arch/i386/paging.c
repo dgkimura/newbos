@@ -159,7 +159,7 @@ init_paging(
      */
     kernel_directory = (page_directory_t *)kmalloc_aligned(sizeof(page_directory_t));
     memset(kernel_directory, 0, sizeof(page_directory_t));
-    current_directory = kernel_directory;
+    kernel_directory->physical_address = (uint32_t)kernel_directory->physical_tables;
 
     /*
      * Map some pages in the kernel heap area. Here we call get_page but not
@@ -212,6 +212,9 @@ init_paging(
      */
     create_heap(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE,
                        0xCFFFF000, 0, 0);
+
+    current_directory = clone_page_directory(kernel_directory);
+    switch_page_directory(current_directory);
 }
 
 void
@@ -219,7 +222,7 @@ switch_page_directory(
     page_directory_t *directory)
 {
     current_directory = directory;
-    enable_paging((uint32_t)&directory->physical_tables);
+    enable_paging((uint32_t)&directory->physical_address);
 }
 
 page_directory_t *
