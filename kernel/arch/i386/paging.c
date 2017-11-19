@@ -34,6 +34,11 @@ get_fault_address(
     void
 );
 
+extern void copy_page_physical(
+    uint32_t,
+    uint32_t
+);
+
 #define INDEX_FROM_BIT(a) (a / (8 * 4))
 #define OFFSET_FROM_BIT(a) (a % (8 * 4))
 
