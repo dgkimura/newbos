@@ -222,7 +222,7 @@ switch_page_directory(
     page_directory_t *directory)
 {
     current_directory = directory;
-    enable_paging((uint32_t)&directory->physical_address);
+    enable_paging((uint32_t)directory->physical_address);
 }
 
 page_directory_t *
