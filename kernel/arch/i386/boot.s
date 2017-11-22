@@ -67,6 +67,12 @@ _start:
     mov $stack_top, %esp
 
     /*
+    We pass ESP into setup so that when we move the stack we can manually
+    calculate and update the ESP and EBP registers.
+    */
+    push %esp
+
+    /*
     Grub bootloader specification states that EBX must contain the 32-bit
     physical address of the multiboot information structure.
     */

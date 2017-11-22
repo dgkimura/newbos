@@ -10,9 +10,13 @@ extern void idt_flush(uint32_t);
 
 extern void enable_interrupts();
 
+uint32_t initial_esp;
+
 void
-kernel_setup(multiboot_t *multiboot)
+kernel_setup(multiboot_t *multiboot, uint32_t esp)
 {
+    initial_esp = esp;
+
     monitor_clear();
 
     init_gdt();
