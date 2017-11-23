@@ -25,7 +25,6 @@ $(ARCHDIR)/keyboard.c \
 $(ARCHDIR)/timer.c \
 $(ARCHDIR)/paging.c \
 $(ARCHDIR)/paging.s \
-$(ARCHDIR)/process.s \
 $(ARCHDIR)/tty.c \
 $(ARCHDIR)/setup.c \
 
