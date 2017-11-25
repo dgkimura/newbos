@@ -77,6 +77,11 @@ page_fault(
     registers_t *regs
 );
 
+extern void
+flush_tlb(
+    void
+);
+
 void
 alloc_frame(
     page_t *page,

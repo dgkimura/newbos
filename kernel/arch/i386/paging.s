@@ -18,6 +18,12 @@ get_fault_address:
     mov %cr2, %eax
     ret
 
+.global flush_tlb
+.type flush_tlb, @function
+flush_tlb:
+    mov %cr0, %eax
+    mov %eax, %cr0
+
 .global copy_page_physical
 .type copy_page_physical, @function
 copy_page_physical:
