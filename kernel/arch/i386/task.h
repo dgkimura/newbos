@@ -30,7 +30,7 @@ int fork(
 
 void
 move_stack(
-    void *new_stack_start,
+    uint32_t new_stack_start,
     uint32_t size
 );
 

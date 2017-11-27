@@ -23,6 +23,7 @@ $(ARCHDIR)/gdt.s \
 $(ARCHDIR)/heap.c \
 $(ARCHDIR)/keyboard.c \
 $(ARCHDIR)/task.c \
+$(ARCHDIR)/task.s \
 $(ARCHDIR)/timer.c \
 $(ARCHDIR)/paging.c \
 $(ARCHDIR)/paging.s \
