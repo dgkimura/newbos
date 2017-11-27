@@ -77,4 +77,8 @@ void irq_handler(registers_t* regs);
 
 void init_irq();
 
+void enable_interrupts();
+
+void disable_interrupts();
+
 #endif

@@ -485,3 +485,8 @@ irq_common_stub:
 .type enable_interrupts, @function
 enable_interrupts:
     sti
+
+.global disable_interrupts
+.type disable_interrupts, @function
+disable_interrupts:
+    cli

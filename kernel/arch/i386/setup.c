@@ -8,8 +8,6 @@
 
 extern void idt_flush(uint32_t);
 
-extern void enable_interrupts();
-
 uint32_t initial_esp;
 
 void
