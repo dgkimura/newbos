@@ -12,10 +12,11 @@ typedef struct task
     uint32_t ebp;
     uint32_t eip;
     page_directory_t *page_directory;
+    struct task *next;
 } task_t;
 
 void
-init_tasking(
+init_tasks(
     void
 );
 

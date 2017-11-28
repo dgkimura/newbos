@@ -1,7 +1,19 @@
 #include <string.h>
 
-#include "task.h"
+#include <newbos/heap.h>
+
+#include "interrupts.h"
 #include "paging.h"
+#include "task.h"
+
+volatile task_t *current_task;
+
+volatile task_t *ready_queue;
+
+/*
+ * The next available process ID.
+ */
+uint32_t next_pid = 1;
 
 extern page_directory_t *current_directory;
 
@@ -14,6 +26,30 @@ extern uint32_t get_ebp();
 extern uint32_t set_esp();
 
 extern uint32_t set_ebp();
+
+void
+init_tasks(
+    void)
+{
+    disable_interrupts();
+
+    /*
+     * Relocate the stack so we know where it is.
+     */
+    move_stack(0xE0000000, 0x2000);
+
+    /*
+     * Initialize the first task (kernel task).
+     */
+    current_task = ready_queue = (task_t *)kmalloc(sizeof(task_t));
+    current_task->id = next_pid++;
+    current_task->esp = current_task->ebp = 0;
+    current_task->eip = 0;
+    current_task->page_directory = current_directory;
+    current_task->next = 0;
+
+    enable_interrupts();
+}
 
 void
 move_stack(
