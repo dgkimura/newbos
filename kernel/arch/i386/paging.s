@@ -23,6 +23,7 @@ get_fault_address:
 flush_tlb:
     mov %cr0, %eax
     mov %eax, %cr0
+    ret
 
 .global copy_page_physical
 .type copy_page_physical, @function
