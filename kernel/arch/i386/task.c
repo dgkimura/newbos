@@ -23,6 +23,8 @@ extern uint32_t get_esp();
 
 extern uint32_t get_ebp();
 
+extern uint32_t get_eip();
+
 extern uint32_t set_esp();
 
 extern uint32_t set_ebp();
@@ -36,7 +38,8 @@ init_tasks(
     /*
      * Relocate the stack so we know where it is.
      */
-    move_stack(0xE0000000, 0x2000);
+    // move_stack(0xE0000000, 0x2000); // FIXME!
+    move_stack(0x80000, 0x2000);
 
     /*
      * Initialize the first task (kernel task).
@@ -117,4 +120,49 @@ move_stack(
      */
     set_esp(new_stack_pointer);
     set_ebp(new_base_pointer);
+}
+
+int
+fork(
+    void)
+{
+    disable_interrupts();
+
+    task_t *parent_task = (task_t *)current_task;
+
+    page_directory_t *directory = clone_page_directory(current_directory);
+
+    /*
+     * Create a new process.
+     */
+    task_t *new_task = (task_t *)kmalloc(sizeof(task_t));
+    new_task->id = next_pid++;
+    new_task->esp = new_task->ebp = 0;
+    new_task->eip = 0;
+    new_task->page_directory = directory;
+    new_task->next = 0;
+
+    task_t *tmp_task = (task_t *)ready_queue;
+    while (tmp_task->next)
+    {
+        tmp_task = tmp_task->next;
+    }
+    tmp_task->next = new_task;
+
+    /*
+     * We could be the parent or the child here - check.
+     */
+    if (current_task == parent_task)
+    {
+        new_task->esp = get_esp();
+        new_task->esp = get_ebp();
+        new_task->eip = get_eip();
+
+        enable_interrupts();
+        return new_task->id;
+    }
+    else
+    {
+        return 0;
+    }
 }

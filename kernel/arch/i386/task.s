@@ -13,6 +13,12 @@ get_esp:
     mov %esp, %eax
     ret
 
+.global get_eip
+.type get_eip, @function
+get_eip:
+    pop %eax
+    ret
+
 .global set_ebp
 .type set_ebp, @function
 set_ebp:

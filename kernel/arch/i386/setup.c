@@ -30,8 +30,10 @@ kernel_setup(multiboot_t *multiboot, uint32_t esp)
 
     init_paging();
     // test paging
-    uint32_t *ptr = (uint32_t *)0xA0000000;
-    monitor_write_hex(*ptr);
+    // uint32_t *ptr = (uint32_t *)0xA0000000;
+    // monitor_write_hex(*ptr);
 
     init_keyboard();
+
+    init_tasks();
 }
