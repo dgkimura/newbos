@@ -22,6 +22,7 @@ $(ARCHDIR)/interrupts.s \
 $(ARCHDIR)/gdt.c \
 $(ARCHDIR)/gdt.s \
 $(ARCHDIR)/keyboard.c \
+$(ARCHDIR)/paging.c \
 $(ARCHDIR)/timer.c \
 $(ARCHDIR)/tty.c \
 $(ARCHDIR)/setup.c \

@@ -1,4 +1,5 @@
 #include <newbos/kmalloc.h>
+#include <newbos/paging.h>
 #include <newbos/timer.h>
 #include <newbos/tty.h>
 
@@ -6,6 +7,8 @@ void
 kernel_main(void)
 {
     monitor_write("Welcome to newbos...\n");
+
+    frames_init();
 
     kmalloc_init((void *)KMALLOC_START, KMALLOC_LENGTH);
 
