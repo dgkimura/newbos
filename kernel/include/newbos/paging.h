@@ -1,6 +1,8 @@
 #ifndef _NEWBOS_PAGING_H
 #define _NEWBOS_PAGING_H
 
+#include <stdint.h>
+
 #define PAGE_SIZE 0x1000
 
 #define PAGE_FLAG_USER        0
@@ -72,6 +74,16 @@ pagetable_get(
     struct pagetable *p,
     uint32_t virtual_address,
     uint32_t *physical_address
+);
+
+void
+pagetable_load(
+    struct pagetable *p
+);
+
+void
+pagetable_enable(
+    void
 );
 
 #endif
