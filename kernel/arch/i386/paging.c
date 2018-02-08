@@ -40,15 +40,18 @@ frame_allocate(
 
     for (i=1; i<freemap_frames; i++)
     {
-        for (j=0; j<FRAME_SIZE; j++)
+        if (freemap[i] != 0)
         {
-            frame_mask = (1<<j);
-            if (freemap[i] & frame_mask)
+            for (j=0; j<FRAME_SIZE; j++)
             {
-                freemap[i] &= ~frame_mask;
-                page_number = i * FRAME_SIZE + j;
-                address = (page_number << PAGE_ALIGNMENT) +
-                          (void *)MAIN_MEMORY_START;
+                frame_mask = (1<<j);
+                if (freemap[i] & frame_mask)
+                {
+                    freemap[i] &= ~frame_mask;
+                    page_number = i * FRAME_SIZE + j;
+                    address = (page_number << PAGE_ALIGNMENT) +
+                              (void *)MAIN_MEMORY_START;
+                }
             }
         }
     }
@@ -96,7 +99,7 @@ pagetable_alloc(
 {
     uint32_t npages = length / PAGE_SIZE;
 
-    if(length%PAGE_SIZE)
+    if(length % PAGE_SIZE)
     {
         npages += 1;
     }
