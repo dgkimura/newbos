@@ -42,7 +42,7 @@ libc.a: $(OBJECTS)
 	$(AR) rcs $@ $(OBJECTS)
 
 .c.o:
-	$(CC) $(CFLAGS) -c $< -o $@ -I include -I kernel/include
+	$(CC) $(CFLAGS) -c $< -o $@ -I include -I kernel/include -I $(ARCHDIR)
 
 .s.o:
 	$(AS) -c $< -o $@

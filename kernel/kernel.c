@@ -3,6 +3,8 @@
 #include <newbos/timer.h>
 #include <newbos/tty.h>
 
+#include "keyboard.h"
+
 void
 kernel_main(void)
 {
@@ -14,6 +16,8 @@ kernel_main(void)
 
     //asm volatile ("int $0x3");
     //asm volatile ("int $0x4");
+
+    init_keyboard();
 
     init_timer(1000);
 

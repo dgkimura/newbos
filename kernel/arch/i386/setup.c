@@ -2,7 +2,6 @@
 
 #include "gdt.h"
 #include "interrupts.h"
-#include "keyboard.h"
 #include "multiboot.h"
 
 extern void idt_flush(uint32_t);
@@ -22,6 +21,4 @@ kernel_setup(multiboot_t *multiboot)
 
     enable_interrupts();
     monitor_write("Interrupts enabled.\n");
-
-    init_keyboard();
 }
