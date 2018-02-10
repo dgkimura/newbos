@@ -46,8 +46,6 @@ typedef struct registers
 
 void idt_set_gate(uint8_t number, uint32_t base, uint16_t selector, uint8_t flags);
 
-void init_isr();
-
 void interrupt_handler(registers_t* regs);
 
 void register_isr_handler(int number, void (*handler)(registers_t*));
@@ -75,7 +73,7 @@ void register_irq_handler(uint8_t, irq_t handler);
 
 void irq_handler(registers_t* regs);
 
-void init_irq();
+void interrupts_init();
 
 void enable_interrupts();
 

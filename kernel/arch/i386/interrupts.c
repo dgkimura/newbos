@@ -7,6 +7,8 @@
 
 idt_entry_t idt_entries[256];
 
+extern void idt_flush(uint32_t);
+
 void
 idt_set_gate(uint8_t number, uint32_t base, uint16_t selector, uint8_t flags)
 
@@ -104,7 +106,7 @@ char* exception_messages[] =
     "(reserved)"
 };
 
-void
+static void
 init_isr()
 {
     memset(&exception_handlers, 0, sizeof(isr_t)*32);
@@ -190,7 +192,7 @@ extern void irq13();
 extern void irq14();
 extern void irq15();
 
-void
+static void
 init_irq()
 {
     // Remap the IRQ table.
@@ -248,4 +250,15 @@ irq_handler(registers_t* regs)
         irq_t handler = interrupt_handlers[regs->interrupt_number];
         handler(regs);
     }
+}
+
+void
+interrupts_init()
+{
+    init_isr();
+    init_irq();
+
+    idt_flush((uint32_t)&idt_ptr);
+
+    monitor_write("Interrupts enabled.\n");
 }
