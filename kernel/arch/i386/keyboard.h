@@ -1,5 +1,5 @@
 #ifndef _NEWBOS_KEYBOARD_H_
 
-void init_keyboard();
+void keyboard_init();
 
 #endif

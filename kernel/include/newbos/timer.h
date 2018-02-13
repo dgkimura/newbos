@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-void init_timer(int16_t frequency);
+void timer_init(int16_t frequency);
 
 #endif

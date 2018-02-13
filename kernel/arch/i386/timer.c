@@ -15,7 +15,7 @@ timer_callback(registers_t* regs)
 }
 
 void
-init_timer(int16_t frequency)
+timer_init(int16_t frequency)
 {
     register_irq_handler(IRQ0, &timer_callback);
 

@@ -129,7 +129,7 @@ keyboard_callback(registers_t* regs)
 }
 
 void
-init_keyboard()
+keyboard_init()
 {
     register_irq_handler(IRQ1, keyboard_callback);
 }

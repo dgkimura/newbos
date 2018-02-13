@@ -17,9 +17,9 @@ kernel_main(void)
     //asm volatile ("int $0x3");
     //asm volatile ("int $0x4");
 
-    init_keyboard();
+    keyboard_init();
 
-    init_timer(1000);
+    timer_init(1000);
 
     // Loop forever.
     for (;;);
