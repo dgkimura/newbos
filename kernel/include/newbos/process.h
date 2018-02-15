@@ -13,6 +13,7 @@ struct process
     struct pagetable *pagetable;
     void *kernel_stack;
     void *process_stack;
+    uint32_t entry;
 };
 
 void
