@@ -1,5 +1,6 @@
 #include <newbos/kmalloc.h>
 #include <newbos/paging.h>
+#include <newbos/process.h>
 #include <newbos/timer.h>
 #include <newbos/tty.h>
 
@@ -20,6 +21,8 @@ kernel_main(void)
     keyboard_init();
 
     timer_init(1000);
+
+    process_init();
 
     // Loop forever.
     for (;;);
