@@ -1,7 +1,3 @@
-CC=$(HOME)/opt/cross/bin/i686-elf-gcc
-AR=$(HOME)/opt/cross/bin/i686-elf-ar
-AS=$(HOME)/opt/cross/bin/i686-elf-as
-
 CFLAGS=-ffreestanding -Wall -Wextra -nostdlib -lgcc -O2
 LDFLAGS=
 
