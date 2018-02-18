@@ -6,6 +6,7 @@ ARCHDIR=kernel/arch/i386
 SOURCES=\
 kernel/kernel.c \
 kernel/kmalloc.c \
+kernel/printk.c \
 kernel/process.c \
 lib/stdlib.c \
 lib/string.c \
