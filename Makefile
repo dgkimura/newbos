@@ -24,7 +24,6 @@ $(ARCHDIR)/paging.c \
 $(ARCHDIR)/paging.s \
 $(ARCHDIR)/timer.c \
 $(ARCHDIR)/tty.c \
-$(ARCHDIR)/setup.c \
 
 ARCH_OBJECTS=$(ARCH_SOURCES:.s=.o)
 ARCH_OBJECTS=$(ARCH_SOURCES:.c=.o)
