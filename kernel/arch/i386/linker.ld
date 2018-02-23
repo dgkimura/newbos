@@ -31,12 +31,11 @@ SECTIONS
         *(.data)
     }
 
-    /* Read-write data (uninitialized) and stack */
+    /* Read-write data (uninitialized) and stack defined in bss section */
     .bss BLOCK(4K) : ALIGN(4K)
     {
         *(COMMON)
         *(.bss)
-        *(.stack)
     }
 
     /* Label indicating the end of the kernel */
