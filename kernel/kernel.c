@@ -13,7 +13,7 @@ kernel_main(void)
 {
     monitor_clear();
 
-    init_gdt();
+    gdt_init();
     clear_idt();
 
     interrupts_init();
