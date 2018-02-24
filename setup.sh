@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 export BINUTILS_VERSION=2.26
 export GCC_VERSION=6.1.0
@@ -16,7 +15,7 @@ if [ -f $HOME/opt/cross/bin/i67-elf-gcc ]; then
     if [[ `uname` == 'Darwin' ]]; then
         brew install gmp mpfr libmpc
     elif [[ `uname` == 'Linux' ]]; then
-        apt-get install libmpc-dev xorriso qemu-system-x86
+        apt-get install libmpc-dev xorriso qemu-system-x86 libc6-dev-i386
     fi
 
     mkdir -p build-binutils && pushd build-binutils
