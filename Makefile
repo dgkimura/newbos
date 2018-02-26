@@ -7,7 +7,6 @@ SOURCES=\
 kernel/kernel.c \
 kernel/kmalloc.c \
 kernel/printk.c \
-kernel/process.c \
 lib/stdlib.c \
 lib/string.c \
 
@@ -19,6 +18,7 @@ $(ARCHDIR)/interrupts.c \
 $(ARCHDIR)/interrupts.s \
 $(ARCHDIR)/gdt.c \
 $(ARCHDIR)/gdt.s \
+$(ARCHDIR)/io.s \
 $(ARCHDIR)/keyboard.c \
 $(ARCHDIR)/paging.c \
 $(ARCHDIR)/paging.s \

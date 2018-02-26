@@ -1,6 +1,7 @@
 #include <stddef.h>
 
 #include <newbos/kmalloc.h>
+#include <newbos/printk.h>
 #include <newbos/tty.h>
 
 enum kchunk_state
@@ -50,7 +51,7 @@ kmalloc(
 
     if (!c)
     {
-        monitor_write("kmalloc: Not enough free memory to satisfy request.\n");
+        printk("kmalloc: Not enough free memory to satisfy request.\n");
         return 0;
     }
 
@@ -96,7 +97,7 @@ kfree(
 
     if (c->state != KCHUNK_STATE_USED)
     {
-        monitor_write("bad kfree!\n");
+        printk("bad kfree!\n");
         return;
     }
 

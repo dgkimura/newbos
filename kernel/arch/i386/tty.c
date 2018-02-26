@@ -1,218 +1,205 @@
 #include <newbos/tty.h>
 
-#include "vga.h"
+#include "io.h"
 
-// The VGA framebuffer starts at 0xB8000.
-uint16_t *video_memory = (uint16_t *)0xB8000;
+#define KERNEL_START_VADDR  0xC0000000
+#define TTY_MEMORY KERNEL_START_VADDR + 0x000B8000
 
-// Stores the cursor position.
-uint8_t cursor_x = 0;
-uint8_t cursor_y = 0;
+#define TTY_NUM_COLS 80
+#define TTY_NUM_ROWS 25
 
-uint8_t
-inb(uint16_t port)
+#define TTY_CURSOR_DATA_PORT 0x3D5
+#define TTY_CURSOR_INDEX_PORT 0x3D4
+
+#define TTY_HIGH_BYTE 14
+#define TTY_LOW_BYTE 15
+
+#define BLACK_ON_WHITE 0x0F
+
+#define TO_ADDRESS(row, col) (fb + 2 * (row * TTY_NUM_COLS + col))
+
+#define TTY_BACKSPACE_ASCII 8
+
+static uint8_t *fb = (uint8_t *) TTY_MEMORY;
+
+static uint16_t cursor_pos;
+
+static uint8_t
+read_cell(
+    uint32_t row,
+    uint32_t col)
 {
-    unsigned char value;
-    asm volatile ("inb %1, %0" : "=a" (value) : "dN" (port));
-    return value;
-}
-
-void
-outb(uint16_t port, uint8_t value)
-{
-    asm volatile ("outb %1, %0" : : "dN" (port), "a" (value));
+    uint8_t *cell = TO_ADDRESS(row, col);
+    return *cell;
 }
 
 static void
-move_cursor()
+write_cell(
+    uint8_t *cell,
+    uint8_t b)
 {
-    // The screen is 80 characters wide...
-    uint16_t cursorLocation = cursor_y * 80 + cursor_x;
-    outb(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
-    outb(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
-    outb(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
-    outb(0x3D5, cursorLocation);      // Send the low cursor byte.
+    cell[0] = b;
+    cell[1] = BLACK_ON_WHITE;
+}
+
+static void
+write_at(
+    uint8_t b,
+    uint32_t row,
+    uint32_t col)
+{
+    uint8_t *cell = TO_ADDRESS(row, col);
+    write_cell(cell, b);
+}
+
+
+static void
+set_cursor(
+    uint16_t loc)
+{
+    outb(TTY_CURSOR_INDEX_PORT, TTY_HIGH_BYTE);
+    outb(TTY_CURSOR_DATA_PORT, loc >> 8);
+    outb(TTY_CURSOR_INDEX_PORT, TTY_LOW_BYTE);
+    outb(TTY_CURSOR_DATA_PORT, loc);
+}
+
+static void
+move_cursor_forward()
+{
+    cursor_pos++;
+    set_cursor(cursor_pos);
+}
+
+static void
+move_cursor_back()
+{
+    if (cursor_pos != 0)
+    {
+        cursor_pos--;
+        set_cursor(cursor_pos);
+    }
+}
+
+static void
+move_cursor_down()
+{
+    cursor_pos += TTY_NUM_COLS;
+    set_cursor(cursor_pos);
+}
+
+static void
+move_cursor_start()
+{
+    cursor_pos -= cursor_pos % TTY_NUM_COLS;
+    set_cursor(cursor_pos);
 }
 
 static void
 scroll()
 {
-    uint8_t attributeByte = vga_entry_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
-    uint16_t blank = 0x20 /* space */ | (attributeByte << 8); 
-
-    // Row 25 is the end, this means we need to scroll up
-    if(cursor_y >= 25)
+    uint32_t r, c;
+    for (r = 1; r < TTY_NUM_ROWS; ++r)
     {
-        // Move the current text chunk that makes up the screen
-        // back in the buffer by a line
+        for (c = 0; c < TTY_NUM_COLS; ++c)
+        {
+            write_at(read_cell(r, c), r - 1, c);
+        }
+    }
+
+    for (c = 0; c < TTY_NUM_COLS; ++c)
+    {
+        write_at(' ', TTY_NUM_ROWS - 1, c);
+    }
+}
+
+void
+tty_write_byte(
+    uint8_t b)
+{
+    if (b != '\n' && b != '\t' && b != TTY_BACKSPACE_ASCII)
+    {
+        uint8_t *cell = fb + 2 * cursor_pos;
+        write_cell(cell, b);
+    }
+
+    if (b == '\n')
+    {
+        move_cursor_down();
+        move_cursor_start();
+    }
+    else if (b == TTY_BACKSPACE_ASCII)
+    {
+        move_cursor_back();
+        uint8_t *cell = fb + 2 * cursor_pos;
+        write_cell(cell, ' ');
+    }
+    else if (b == '\t')
+    {
         int i;
-        for (i = 0*80; i < 24*80; i++)
+        for (i = 0; i < 4; ++i)
         {
-            video_memory[i] = video_memory[i+80];
+            tty_write_byte(' ');
         }
-
-        // The last line should now be blank. Do this by writing
-        // 80 spaces to it.
-        for (i = 24*80; i < 25*80; i++)
-        {
-            video_memory[i] = blank;
-        }
-        // The cursor should now be on the last line.
-        cursor_y = 24;
-    }
-}
-
-void
-monitor_put(char c)
-{
-    uint8_t attributeByte = vga_entry_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
-    // The attribute byte is the top 8 bits of the word we have to send to the
-    // VGA board.
-    uint16_t attribute = attributeByte << 8;
-    uint16_t *location;
-
-    // Handle a backspace, by moving the cursor back one space
-    if (c == 0x08 && cursor_x)
-    {
-        cursor_x--;
-    }
-
-    // Handle a tab by increasing the cursor's X, but only to a point
-    // where it is divisible by 8.
-    else if (c == 0x09)
-    {
-        cursor_x = (cursor_x+8) & ~(8-1);
-    }
-
-    // Handle carriage return
-    else if (c == '\r')
-    {
-        cursor_x = 0;
-    }
-
-    // Handle newline by moving cursor back to left and increasing the row
-    else if (c == '\n')
-    {
-        cursor_x = 0;
-        cursor_y++;
-    }
-    // Handle any other printable character.
-    else if(c >= ' ')
-    {
-        location = video_memory + (cursor_y*80 + cursor_x);
-        *location = c | attribute;
-        cursor_x++;
-    }
-
-    // Check if we need to insert a new line because we have reached the end
-    // of the screen.
-    if (cursor_x >= 80)
-    {
-        cursor_x = 0;
-        cursor_y ++;
-    }
-
-    // Scroll the screen if needed.
-    scroll();
-    // Move the hardware cursor.
-    move_cursor();
-}
-
-void
-monitor_clear()
-{
-    uint8_t attributeByte = vga_entry_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
-    uint16_t blank = 0x20 /* space */ | (attributeByte << 8);
-
-    int i;
-    for (i = 0; i < 80*25; i++)
-    {
-        video_memory[i] = blank;
-    }
-
-    // Move the hardware cursor back to the start.
-    cursor_x = 0;
-    cursor_y = 0;
-    move_cursor();
-}
-
-void
-monitor_write(char *c)
-{
-    int i = 0;
-    while (c[i])
-    {
-        monitor_put(c[i++]);
-    }
-}
-
-void
-monitor_write_hex(uint32_t n)
-{
-    int32_t tmp;
-
-    monitor_write("0x");
-
-    char noZeroes = 1;
-
-    int i;
-    for (i = 28; i > 0; i -= 4)
-    {
-        tmp = (n >> i) & 0xF;
-        if (tmp == 0 && noZeroes != 0)
-        {
-            continue;
-        }
-
-        if (tmp >= 0xA)
-        {
-            noZeroes = 0;
-            monitor_put(tmp-0xA+'a');
-        }
-        else
-        {
-            noZeroes = 0;
-            monitor_put(tmp+'0');
-        }
-    }
-
-    tmp = n & 0xF;
-    if (tmp >= 0xA)
-    {
-        monitor_put(tmp-0xA+'a');
     }
     else
     {
-        monitor_put(tmp+'0');
+        move_cursor_forward();
+    }
+
+    if (cursor_pos >= TTY_NUM_COLS * TTY_NUM_ROWS)
+    {
+        scroll();
+        tty_move_cursor(24, 0);
     }
 }
 
 void
-monitor_write_dec(uint32_t n)
+tty_write_string(
+    char const *s)
 {
-    if (n == 0)
+    while (*s != '\0')
     {
-        monitor_put('0');
-        return;
+        tty_write_byte(*s++);
     }
+}
 
-    int32_t acc = n;
-    char c[32];
-    int i = 0;
-    while (acc > 0)
-    {
-        c[i] = '0' + acc%10;
-        acc /= 10;
-        i++;
-    }
-    c[i] = 0;
+void
+tty_write_hex(
+    uint32_t n)
+{
+    char *chars = "0123456789ABCDEF";
+    unsigned char b = 0;
+    int i;
 
-    char c2[32];
-    c2[i--] = 0;
-    int j = 0;
-    while(i >= 0)
+    tty_write_string("0x");
+
+    for (i = 7; i >= 0; --i)
     {
-        c2[i--] = c[j++];
+        b = (n >> i*4) & 0x0F;
+        tty_write_byte(chars[b]);
     }
-    monitor_write(c2);
+}
+
+void
+tty_clear()
+{
+    uint8_t i, j;
+    for (i = 0; i < TTY_NUM_ROWS; ++i)
+    {
+        for (j = 0; j < TTY_NUM_COLS; ++j)
+        {
+            write_at(' ', i, j);
+        }
+    }
+    tty_move_cursor(0, 0);
+}
+
+void
+tty_move_cursor(
+    uint16_t row,
+    uint16_t col)
+{
+    uint16_t loc = row*TTY_NUM_COLS + col;
+    cursor_pos = loc;
+    set_cursor(loc);
 }

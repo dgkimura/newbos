@@ -1,6 +1,7 @@
-#include <newbos/tty.h>
+#include <newbos/printk.h>
 
 #include "interrupts.h"
+#include "io.h"
 
 unsigned char keyboard_layout[128] =
 {
@@ -124,7 +125,7 @@ keyboard_callback(registers_t* regs)
         // above layout to correspond to 'shift' being held. If shift is held
         // using the larger lookup table, you would add 128 to the scancode
         //when you look for it.
-        monitor_put(keyboard_layout[scancode]);
+        printk("%s", keyboard_layout[scancode]);
     }
 }
 

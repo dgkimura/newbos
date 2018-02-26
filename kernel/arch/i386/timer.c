@@ -1,7 +1,8 @@
-#include "interrupts.h"
-
 #include <newbos/timer.h>
-#include <newbos/tty.h>
+#include <newbos/printk.h>
+
+#include "interrupts.h"
+#include "io.h"
 
 uint32_t tick = 0;
 
@@ -9,9 +10,7 @@ static void
 timer_callback(registers_t* regs)
 {
     tick += 1;
-    monitor_write("Tick: ");
-    monitor_write_dec(tick);
-    monitor_write("\n");
+    printk("Tick: %X\n", tick);
 }
 
 void

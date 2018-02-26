@@ -36,6 +36,21 @@ stack_bottom:
 .skip 16384 # 16 KiB
 stack_top:
 
+.set KERNEL_START_VADDR,    0xC0000000
+.set KERNEL_PDT_IDX,       (KERNEL_START_VADDR >> 22)
+
+/*
+Declares the kernel data structures: page directory and page table.
+*/
+.section .data
+.align 4096
+kernel_pt:
+.fill 1024, 4, 0
+
+kernel_pdt:
+.long 0x0000008B    /* flags: global, present, readwrite, writethrough */
+.fill 1023, 4, 0
+
 /*
 The linker script specifies _start as the entry point to the kernel and the
 bootloader will jump to this position once the kernel has been loaded. It
@@ -82,6 +97,37 @@ _start:
     C++ features such as global cunstructors and exceptions will require
     runtime support to work here as well.
     */
+setup_kernel_pdt:
+    mov $(kernel_pdt - KERNEL_START_VADDR + KERNEL_PDT_IDX*4), %ecx
+    mov $(kernel_pt - KERNEL_START_VADDR), %edx
+    or  $0x0000000B, %edx
+    mov %edx, (%ecx)
+
+setup_kernel_pt:
+    mov $(kernel_pt - KERNEL_START_VADDR), %eax
+    mov $0x0000000B, %ecx
+
+loop:
+    mov %ecx, (%eax)
+    add $4, %eax
+    add $0x1000, %ecx
+    cmp $kernel_physical_end, %ecx
+    jle loop
+
+enable_paging:
+    mov $(kernel_pdt - KERNEL_START_VADDR), %ecx
+
+    and $0xFFFFF000, %ecx # we only care about the upper 20 bits
+    or  $0x08,%ecx        # PWT, enable page write through?
+    mov %ecx, %cr3        # load pdt
+
+    mov %cr4, %ecx        # read current config from cr4
+    or  $0x00000010, %ecx # set bit enabling 4MB pages
+    mov %ecx, %cr4        # enable it by writing to cr4
+
+    mov %cr0, %ecx        # read current config from cr0
+    or  $0x80000000, %ecx # the highest bit controls paging
+    mov %ecx, %cr0        # enable paging by writing config to cr0
 
     /*
     Enter the high-level kernel. The ABI requires the stack is 16-byte
@@ -106,11 +152,6 @@ _start:
        non-maskable interrupt occurring or due to system management mode.
     */
     cli
-1:  hlt
-    jmp 1b
 
-/*
-Set the size of the _start symbol to the current location '.' minus its start.
-This is useful when debugging or when you implement call tracing.
-*/
-.size _start, . - _start
+hang:
+    jmp hang

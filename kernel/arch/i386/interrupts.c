@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <newbos/tty.h>
+#include <newbos/printk.h>
 
 #include "interrupts.h"
+#include "io.h"
 
 idt_entry_t idt_entries[256];
 
@@ -154,13 +155,10 @@ interrupt_handler(registers_t* regs)
     }
     else
     {
-        monitor_write("Unhandled exception - ");
-        monitor_write_dec(regs->interrupt_number);
-        monitor_write(" : [errno - ");
-        monitor_write_dec(regs->error_code);
-        monitor_write("] : ");
-        monitor_write(exception_messages[regs->interrupt_number]);
-        monitor_write("\n");
+        printk("Unhandled exception - %X : [errno - %X]: %s\n",
+               regs->interrupt_number,
+               regs->error_code,
+               exception_messages[regs->interrupt_number]);
         abort();
     }
 }
@@ -260,5 +258,5 @@ interrupts_init()
 
     idt_flush((uint32_t)&idt_ptr);
 
-    monitor_write("Interrupts enabled.\n");
+    printk("Interrupts enabled.\n");
 }

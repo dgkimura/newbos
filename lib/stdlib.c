@@ -1,10 +1,10 @@
 #include <stdlib.h>
 
-#include <newbos/tty.h>
+#include <newbos/printk.h>
 
 void
 abort(void)
 {
-    monitor_write("abort()\n");
+    printk("abort()\n");
     for (;;);
 }

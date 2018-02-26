@@ -1,8 +1,8 @@
 #include <newbos/kmalloc.h>
 #include <newbos/paging.h>
 #include <newbos/printk.h>
-#include <newbos/process.h>
 #include <newbos/timer.h>
+#include <newbos/tty.h>
 
 #include "gdt.h"
 #include "interrupts.h"
@@ -11,8 +11,6 @@
 void
 kernel_main(void)
 {
-    monitor_clear();
-
     gdt_init();
     clear_idt();
 
@@ -20,6 +18,7 @@ kernel_main(void)
 
     enable_interrupts();
 
+    tty_clear();
     printk("Welcome to newbos...\n");
 
     frames_init();
@@ -31,7 +30,7 @@ kernel_main(void)
 
     keyboard_init();
 
-    timer_init(1000);
+    //timer_init(1000);
 
     //process_init();
 

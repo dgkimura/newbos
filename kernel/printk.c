@@ -19,23 +19,21 @@ printk(
     for (p = fmt; *p != '\0'; ++p)
     {
         if (*p != '%') {
-            monitor_put(*p);
+            tty_write_byte(*p);
             continue;
         }
 
         switch (*++p) {
             case 'X':
                 uival = va_arg(ap, uint32_t);
-                monitor_write_hex(uival);
+                tty_write_hex(uival);
                 break;
             case 's':
                 sval = va_arg(ap, char*);
-                for(; *sval; ++sval) {
-                    monitor_put(*sval);
-                }
+                tty_write_string(sval);
                 break;
             case '%':
-                monitor_put('%');
+                tty_write_byte('%');
                 break;
         }
     }

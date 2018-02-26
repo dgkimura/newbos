@@ -3,21 +3,30 @@
 
 #include <stdint.h>
 
-uint8_t inb(uint16_t port);
+void
+tty_write_byte(
+    uint8_t b
+);
 
-void outb(uint16_t port, uint8_t value);
+void
+tty_write_string(
+    char const *s
+);
 
-// Write a single character out to the screen.
-void monitor_put(char c);
+void
+tty_write_hex(
+    uint32_t i
+);
 
-// Clear the screen to all black.
-void monitor_clear();
+void
+tty_clear(
+    void
+);
 
-// Output a null-terminated ASCII string to the monitor.
-void monitor_write(char *c);
-
-void monitor_write_dec(uint32_t n);
-
-void monitor_write_hex(uint32_t n);
+void
+tty_move_cursor(
+    uint16_t row,
+    uint16_t col
+);
 
 #endif
