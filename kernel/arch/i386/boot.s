@@ -82,12 +82,6 @@ _start:
     mov $stack_top, %esp
 
     /*
-    Grub bootloader specification states that EBX must contain the 32-bit
-    physical address of the multiboot information structure.
-    */
-    push %ebx
-
-    /*
     This is a good place to initialize crucial processor state before the
     high-level kernel is entered. It's best to minimize the early
     environment where crucial features are offline. Note that the
@@ -128,6 +122,18 @@ enable_paging:
     mov %cr0, %ecx        # read current config from cr0
     or  $0x80000000, %ecx # the highest bit controls paging
     mov %ecx, %cr0        # enable paging by writing config to cr0
+
+    /*
+    Grub bootloader specification states that EBX must contain the 32-bit
+    physical address of the multiboot information structure.
+    */
+    push %ebx
+    push $kernel_pt
+    push $kernel_pdt
+    push $kernel_virtual_end
+    push $kernel_virtual_start
+    push $kernel_physical_end
+    push $kernel_physical_start
 
     /*
     Enter the high-level kernel. The ABI requires the stack is 16-byte
