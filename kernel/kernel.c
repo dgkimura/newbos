@@ -7,17 +7,17 @@
 #include "gdt.h"
 #include "interrupts.h"
 #include "keyboard.h"
+#include "multiboot.h"
 
 void
 kernel_main(
-    uint32_t multiboot_info_address,
     uint32_t kernel_physical_start,
     uint32_t kernel_physical_end,
     uint32_t kernel_virtual_start,
     uint32_t kernel_virtual_end,
     uint32_t kernel_pdt_vaddr,
-    uint32_t kernel_pt_vaddr
-    )
+    uint32_t kernel_pt_vaddr,
+    struct multiboot *multiboot_info)
 {
     gdt_init();
     clear_idt();
