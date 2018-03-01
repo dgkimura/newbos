@@ -19,6 +19,11 @@ tty_write_hex(
 );
 
 void
+tty_write_int(
+    uint32_t n
+);
+
+void
 tty_clear(
     void
 );

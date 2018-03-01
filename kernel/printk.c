@@ -28,6 +28,10 @@ printk(
                 uival = va_arg(ap, uint32_t);
                 tty_write_hex(uival);
                 break;
+            case 'u':
+                uival = va_arg(ap, uint32_t);
+                tty_write_int(uival);
+                break;
             case 's':
                 sval = va_arg(ap, char*);
                 tty_write_string(sval);

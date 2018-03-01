@@ -181,6 +181,31 @@ tty_write_hex(
 }
 
 void
+tty_write_int(
+    uint32_t n)
+{
+    char *chars = "0123456789";
+    unsigned char reversed[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int i = 0;
+
+    if (n == 0)
+    {
+        tty_write_byte('0');
+        return;
+    }
+
+    while (n > 0)
+    {
+        reversed[++i] = n % 10;
+        n /= 10;
+    }
+    for (; 0<i; i--)
+    {
+        tty_write_byte(chars[reversed[i]]);
+    }
+}
+
+void
 tty_clear()
 {
     uint8_t i, j;
