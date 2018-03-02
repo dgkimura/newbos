@@ -17,7 +17,7 @@ kernel_main(
     uint32_t kernel_virtual_end,
     uint32_t kernel_pdt_vaddr,
     uint32_t kernel_pt_vaddr,
-    struct multiboot *multiboot_info)
+    struct multiboot_info *multiboot_info)
 {
     gdt_init();
     clear_idt();
