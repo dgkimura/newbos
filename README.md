@@ -1,5 +1,7 @@
 # newbos
 
+newbos is strictly a hobby kernel.
+
 ## Build
 You will need to build a cross compiler. You can use the setup script on Ubuntu.
 ```
