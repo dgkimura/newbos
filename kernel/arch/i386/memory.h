@@ -5,4 +5,6 @@
 
 #define MAIN_MEMORY_SIZE  0x8000000
 
+#define KERNEL_START_VADDR  0xC0000000
+
 #endif
