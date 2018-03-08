@@ -30,12 +30,15 @@ struct pagetable_entry
 };
 
 struct pagetable {
-	struct pagetable_entry entry[PAGE_SIZE/4];
+    struct pagetable_entry entry[PAGE_SIZE/4];
 };
 
 void
 frames_init(
-    void
+    uint32_t kernel_physical_start,
+    uint32_t kernel_physical_end,
+    uint32_t kernel_virtual_start,
+    uint32_t kernel_virtual_end
 );
 
 void *

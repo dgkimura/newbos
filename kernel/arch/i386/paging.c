@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include <newbos/paging.h>
+#include <newbos/printk.h>
 
 #include "memory.h"
 
@@ -13,8 +14,17 @@ static uint32_t freemap_frames;
 
 void
 frames_init(
-    void)
+    uint32_t kernel_physical_start,
+    uint32_t kernel_physical_end,
+    uint32_t kernel_virtual_start,
+    uint32_t kernel_virtual_end)
 {
+    printk("Kernel Address:\n");
+    printk(" Physical: [%X ... %X]\n",
+           kernel_physical_start, kernel_physical_end);
+    printk(" Virtual:  [%X ... %X]\n",
+           kernel_virtual_start, kernel_virtual_end);
+
     uint32_t i;
     uint32_t freemap_bits = MAIN_MEMORY_SIZE/PAGE_SIZE;
     uint32_t freemap_bytes = freemap_bits / 8;

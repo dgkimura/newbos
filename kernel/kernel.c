@@ -29,7 +29,8 @@ kernel_main(
     tty_clear();
     printk("Welcome to newbos...\n");
 
-    frames_init();
+    frames_init(kernel_physical_start, kernel_physical_end,
+                kernel_virtual_start, kernel_virtual_end);
 
     kmalloc_init((void *)KMALLOC_START, KMALLOC_LENGTH);
 
