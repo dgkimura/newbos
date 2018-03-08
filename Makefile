@@ -1,4 +1,4 @@
-CFLAGS=-ffreestanding -Wall -Wextra -nostdlib -lgcc -g -O2
+CFLAGS=-ffreestanding -Wall -Wextra -nostdlib -g -O2
 LDFLAGS=
 
 ARCHDIR=kernel/arch/i386
