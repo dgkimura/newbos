@@ -17,7 +17,8 @@ kernel_main(
     uint32_t kernel_virtual_end,
     uint32_t kernel_pdt_vaddr,
     uint32_t kernel_pt_vaddr,
-    struct multiboot_info *multiboot_info)
+    struct multiboot_info *multiboot_info,
+    uint32_t magic_number)
 {
     gdt_init();
     clear_idt();
@@ -27,6 +28,12 @@ kernel_main(
     enable_interrupts();
 
     tty_clear();
+
+    if (magic_number != MULTIBOOT_BOOTLOADER_MAGIC) {
+        printk("ERROR: magic number '%X' is wrong!\n", magic_number);
+        return 0xDEADDEAD;
+    }
+
     printk("Welcome to newbos...\n");
 
     frames_init(kernel_physical_start, kernel_physical_end,

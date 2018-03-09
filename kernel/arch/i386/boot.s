@@ -52,6 +52,18 @@ kernel_pdt:
 .fill 1023, 4, 0
 
 /*
+Grub boot info at a known accessible location after we enable high half kernel
+paging.
+*/
+.section .data
+.align 4
+multiboot_info:
+.skip 4
+
+grub_magic_number:
+.skip 4
+
+/*
 The linker script specifies _start as the entry point to the kernel and the
 bootloader will jump to this position once the kernel has been loaded. It
 doesn't make sense to return from this function as the bootloader is gone.
@@ -80,6 +92,15 @@ _start:
     in assembly as languages such as C cannot function without a stack.
     */
     mov $stack_top, %esp
+
+    /*
+    To copy grub boot info to a known location accessible after we enable high
+    half kernel paging.
+    */
+    mov $(grub_magic_number - KERNEL_START_VADDR), %ecx
+    mov %eax, (%ecx)
+    mov $(multiboot_info - KERNEL_START_VADDR), %ecx
+    mov %ebx, (%ecx)
 
     /*
     This is a good place to initialize crucial processor state before the
@@ -127,7 +148,8 @@ enable_paging:
     Grub bootloader specification states that EBX must contain the 32-bit
     physical address of the multiboot information structure.
     */
-    push %ebx
+    push grub_magic_number - KERNEL_START_VADDR
+    push multiboot_info - KERNEL_START_VADDR
     push $kernel_pt
     push $kernel_pdt
     push $kernel_virtual_end
