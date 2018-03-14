@@ -9,6 +9,22 @@
 #include "keyboard.h"
 #include "multiboot.h"
 
+#define KERNEL_START_VADDR  0xC0000000
+
+#define PHYSICAL_TO_VIRTUAL(address) ((address) + KERNEL_START_VADDR)
+
+static struct multiboot_info *
+remap_multiboot_info(
+    struct multiboot_info *minfo)
+{
+    struct multiboot_info *vminfo= PHYSICAL_TO_VIRTUAL(minfo);
+
+    vminfo->mmap_addr = PHYSICAL_TO_VIRTUAL(minfo->mmap_addr);
+    vminfo->mods_addr = PHYSICAL_TO_VIRTUAL(minfo->mods_addr);
+
+    return vminfo;
+}
+
 void
 kernel_main(
     uint32_t kernel_physical_start,
@@ -17,7 +33,7 @@ kernel_main(
     uint32_t kernel_virtual_end,
     uint32_t kernel_pdt_vaddr,
     uint32_t kernel_pt_vaddr,
-    struct multiboot_info *multiboot_info,
+    struct multiboot_info *minfo,
     uint32_t magic_number)
 {
     gdt_init();
@@ -31,10 +47,12 @@ kernel_main(
 
     if (magic_number != MULTIBOOT_BOOTLOADER_MAGIC) {
         printk("ERROR: magic number '%X' is wrong!\n", magic_number);
-        return 0xDEADDEAD;
+        return;
     }
 
     printk("Welcome to newbos...\n");
+
+    struct multiboot_info *vminfo = remap_multiboot_info(minfo);
 
     frames_init(kernel_physical_start, kernel_physical_end,
                 kernel_virtual_start, kernel_virtual_end);
