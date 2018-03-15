@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "multiboot.h"
+
 #define PAGE_SIZE 0x1000
 
 #define PAGE_FLAG_USER        0
@@ -38,7 +40,8 @@ frames_init(
     uint32_t kernel_physical_start,
     uint32_t kernel_physical_end,
     uint32_t kernel_virtual_start,
-    uint32_t kernel_virtual_end
+    uint32_t kernel_virtual_end,
+    struct multiboot_info *minfo
 );
 
 void *

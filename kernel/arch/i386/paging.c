@@ -6,24 +6,90 @@
 
 #include "memory.h"
 
+typedef struct memory_map memory_map_t;
 static uint32_t *freemap;
 static uint32_t freemap_frames;
 
 #define FRAME_SIZE (8*sizeof(*freemap))
 #define PAGE_ALIGNMENT 12
 
+#define MAX_NUM_MEMORY_MAP  100
+
+struct memory_map {
+    uint32_t addr;
+    uint32_t len;
+};
+static memory_map_t mmap[MAX_NUM_MEMORY_MAP];
+
+static uint32_t fill_memory_map(
+    uint32_t kernel_physical_start,
+    uint32_t kernel_physical_end,
+    uint32_t kernel_virtual_start,
+    uint32_t kernel_virtual_end,
+    struct multiboot_info *multiboot_info)
+{
+    uint32_t addr = 0, len = 0, i = 0;
+
+    /*
+     * Grub multiboot documents that flag[6] bit indicates presense of mmap_*
+     * fields set in multiboot structure.
+     */
+    if ((multiboot_info->flags & 0x00000040) == 0) {
+        printk("No memory map from GRUB\n");
+        return 0;
+    }
+
+    multiboot_memory_map_t *entry =
+        (multiboot_memory_map_t *) multiboot_info->mmap_addr;
+    while ((uint32_t) entry < multiboot_info->mmap_addr +
+                              multiboot_info->mmap_length) {
+        if (entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
+            addr = (uint32_t) entry->addr;
+            len = (uint32_t) entry->len;
+            if (addr <= kernel_physical_start
+                    && (addr + len) > kernel_physical_end) {
+
+                addr = kernel_physical_end;
+                len = len - kernel_physical_end;
+
+            }
+
+            if (addr > 0x100000) {
+                mmap[i].addr = addr;
+                mmap[i].len = len;
+                ++i;
+            }
+        }
+        entry = (multiboot_memory_map_t *)
+            (((uint32_t) entry) + entry->size + sizeof(entry->size));
+    }
+    printk("addr: %X    len: %X\n", addr, len);
+
+    return i;
+}
+
 void
 frames_init(
     uint32_t kernel_physical_start,
     uint32_t kernel_physical_end,
     uint32_t kernel_virtual_start,
-    uint32_t kernel_virtual_end)
+    uint32_t kernel_virtual_end,
+    struct multiboot_info *minfo)
 {
     printk("Kernel Address:\n");
     printk(" Physical: [%X ... %X]\n",
            kernel_physical_start, kernel_physical_end);
     printk(" Virtual:  [%X ... %X]\n",
            kernel_virtual_start, kernel_virtual_end);
+
+
+    uint32_t n;
+    n = fill_memory_map(
+        kernel_physical_start,
+        kernel_physical_end,
+        kernel_virtual_start,
+        kernel_virtual_end,
+        minfo);
 
     uint32_t i;
     uint32_t freemap_bits = MAIN_MEMORY_SIZE/PAGE_SIZE;
