@@ -15,3 +15,10 @@ pagetable_enable:
     or  $0x80000000, %eax
     mov %eax, %cr0
     ret
+
+.global invalidate_page_table_entry
+.type invalidate_page_table_entry, @function
+invalidate_page_table_entry:
+    mov 4(%esp), %eax
+    invlpg (%eax)
+    ret

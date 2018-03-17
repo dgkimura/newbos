@@ -41,7 +41,14 @@ frames_init(
     uint32_t kernel_physical_end,
     uint32_t kernel_virtual_start,
     uint32_t kernel_virtual_end,
+    uint32_t kernel_pdt_vaddr,
+    uint32_t kernel_pt_vaddr,
     struct multiboot_info *minfo
+);
+
+uint32_t
+pfa_allocate(
+    uint32_t num_page_frames
 );
 
 void *

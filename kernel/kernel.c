@@ -38,6 +38,7 @@ kernel_main(
 
     frames_init(kernel_physical_start, kernel_physical_end,
                 kernel_virtual_start, kernel_virtual_end,
+                kernel_pdt_vaddr, kernel_pt_vaddr,
                 minfo);
 
     kmalloc_init((void *)KMALLOC_START, KMALLOC_LENGTH);
