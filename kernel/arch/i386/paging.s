@@ -8,14 +8,6 @@ pagetable_load:
     mov %eax, %cr3
     ret
 
-.global pagetable_enable
-.type pagetable_enable, @function
-pagetable_enable:
-    mov %cr0, %eax
-    or  $0x80000000, %eax
-    mov %eax, %cr0
-    ret
-
 .global invalidate_page_table_entry
 .type invalidate_page_table_entry, @function
 invalidate_page_table_entry:

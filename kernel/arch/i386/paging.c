@@ -164,7 +164,7 @@ pt_kernel_find_next_vaddr(
     return 0;
 }
 
-static uint32_t
+uint32_t
 pdt_kernel_find_next_vaddr(
     uint32_t size)
 {
@@ -581,7 +581,8 @@ pfa_allocate(
  * @param pl    The required privilege level to access the page,
  *              0 = PL0, 1 = PL3
  */
-static void create_pdt_entry(
+static void
+create_pdt_entry(
     struct pde *pdt,
     uint32_t n,
     uint32_t addr,
@@ -633,11 +634,13 @@ static void create_pdt_entry(
  * @param pl    The required privilege level to access the page,
  *              0 = PL0, 1 = PL3
  */
-static void create_pt_entry(struct pte *pt,
-                            uint32_t n,
-                            uint32_t addr,
-                            uint8_t rw,
-                            uint8_t pl)
+static void
+create_pt_entry(
+    struct pte *pt,
+    uint32_t n,
+    uint32_t addr,
+    uint8_t rw,
+    uint8_t pl)
 {
     /* Since page tables are aligned at 4kB boundaries, we only need to store
      * the 20 highest bits */
