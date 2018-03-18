@@ -41,12 +41,14 @@ kernel_main(
                 kernel_pdt_vaddr, kernel_pt_vaddr,
                 minfo);
 
-    kmalloc_init((void *)KMALLOC_START, KMALLOC_LENGTH);
-
     //asm volatile ("int $0x3");
     //asm volatile ("int $0x4");
 
     keyboard_init();
+
+    int *i = (int *)kmalloc(sizeof(int));
+    *i = 42;
+    printk("kmalloc'd '%u' at %X...\n", *i, i);
 
     //timer_init(1000);
 

@@ -7,14 +7,10 @@
 
 #define PAGE_SIZE 0x1000
 
-#define PAGE_FLAG_USER        0
-#define PAGE_FLAG_KERNEL      1
-#define PAGE_FLAG_EXISTS      0
-#define PAGE_FLAG_ALLOC       2
-#define PAGE_FLAG_READONLY    0
-#define PAGE_FLAG_READWRITE   4
-#define PAGE_FLAG_NOCLEAR     0
-#define PAGE_FLAG_CLEAR       8
+#define PAGING_READ_ONLY  0
+#define PAGING_READ_WRITE 1
+#define PAGING_PL0        0
+#define PAGING_PL3        1
 
 void
 frames_init(
@@ -30,6 +26,15 @@ frames_init(
 uint32_t
 pfa_allocate(
     uint32_t num_page_frames
+);
+
+uint32_t
+pdt_map_kernel_memory(
+    uint32_t paddr,
+    uint32_t vaddr,
+    uint32_t size,
+    uint8_t rw,
+    uint8_t pl
 );
 
 #endif

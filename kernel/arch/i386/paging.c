@@ -302,7 +302,7 @@ pdt_map_memory(
     return total_mapped_size;
 }
 
-static uint32_t
+uint32_t
 pdt_map_kernel_memory(
     uint32_t paddr,
     uint32_t vaddr,
