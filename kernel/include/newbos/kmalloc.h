@@ -16,10 +16,4 @@ kfree(
     void *p
 );
 
-void
-kmalloc_init(
-    void *start,
-    uint32_t length
-);
-
 #endif

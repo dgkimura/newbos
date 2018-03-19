@@ -4,22 +4,35 @@
 #include <newbos/paging.h>
 #include <newbos/printk.h>
 
-#define MIN_BLOCK_SIZE  1024 /* in units */
+/*
+ * in units
+ */
+#define MIN_BLOCK_SIZE  1024
 #define FOUR_KB     0x1000
 
-/* malloc() and free() as implemented by K&R */
+/*
+ * malloc() and free() as implemented by K&R
+ */
 
 typedef double align;
 
 struct header {
     struct header *next;
-    size_t size; /* size in "number of header units" */
+    /*
+     * Size in "number of header units"
+     */
+    size_t size;
 };
 typedef struct header header_t;
 
-/* empty list to get started */
+/*
+ * Empty list to get started
+ */
 static header_t base;
-/* start of free list */
+
+/*
+ * Start of free list
+ */
 static header_t *freep = 0;
 
 static void *
@@ -35,7 +48,8 @@ div_ceil(
     return (num - 1) / den + 1;
 }
 
-void *kmalloc(size_t nbytes)
+void *
+kmalloc(size_t nbytes)
 {
     header_t *p, *prevp;
     size_t nunits;
@@ -48,7 +62,9 @@ void *kmalloc(size_t nbytes)
 
     if (freep == 0)
     {
-        /* no free list yet */
+        /*
+         * No free list yet.
+         */
         base.next = freep = &base;
         base.size = 0;
     }
@@ -60,18 +76,28 @@ void *kmalloc(size_t nbytes)
     {
         if (p->size >= nunits)
         {
-            /* the block is big enough */
+            /*
+             * The block is big enough.
+             */
             if (p->size == nunits)
             {
-                /* exactly */
+                /*
+                 * Exactly
+                 */
                 prevp->next = p->next;
             }
             else
             {
-                /* allocate at the tail end of the block and create a new
-                 * header in front of allocated block */
+                /*
+                 * Allocate at the tail end of the block and create a new
+                 * header in front of allocated block.
+                 */
                 p->size -= nunits;
-                p += p->size; /* make p point to new header */
+
+                /*
+                 * Make p point to new header.
+                 */
+                p += p->size;
                 p->size = nunits;
             }
             freep = prevp;
@@ -79,7 +105,9 @@ void *kmalloc(size_t nbytes)
         }
         if (p == freep)
         {
-            /* wrapped around free list */
+            /*
+             * Wrapped around free list.
+             */
             if ((p = acquire_more_heap(nunits)) == NULL)
             {
                 printk("Cannot acquire more memory. memory: %u",
@@ -90,7 +118,8 @@ void *kmalloc(size_t nbytes)
     }
 }
 
-static void *acquire_more_heap(size_t nunits)
+static void *
+acquire_more_heap(size_t nunits)
 {
     uint32_t vaddr, paddr, bytes, page_frames, mapped_mem;
     header_t *p;
@@ -139,7 +168,8 @@ static void *acquire_more_heap(size_t nunits)
     return freep;
 }
 
-void kfree(void * ap)
+void
+kfree(void * ap)
 {
     header_t *bp, *p;
 
@@ -148,20 +178,26 @@ void kfree(void * ap)
         return;
     }
 
-    /* point to block header */
+    /*
+     * Point to block header.
+     */
     bp = (header_t *)ap - 1;
     for (p = freep; !(bp > p && bp < p->next); p = p->next)
     {
         if (p >= p->next && (bp > p || bp < p->next))
         {
-            /* freed block at start of end of arena */
+            /*
+             * Freed block at start of end of arena.
+             */
             break;
         }
     }
 
     if (bp + bp->size == p->next)
     {
-        /* join to upper nbr */
+        /*
+         * Join to upper nbr.
+         */
         bp->size += p->next->size;
         bp->next = p->next->next;
     }
@@ -172,7 +208,9 @@ void kfree(void * ap)
 
     if (p + p->size == bp)
     {
-        /* join to lower nbr */
+        /*
+         * Join to lower nbr.
+         */
         p->size += bp->size;
         p->next = bp->next;
     }
@@ -181,6 +219,8 @@ void kfree(void * ap)
         p->next = bp;
     }
 
-    /* TODO: If the block is larger than a page frame, give back to pfa! */
+    /*
+     * TODO: If the block is larger than a page frame, give back to pfa!
+     */
     freep = p;
 }
