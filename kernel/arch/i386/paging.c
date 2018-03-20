@@ -7,6 +7,7 @@
 #include "memory.h"
 
 #define NUM_ENTRIES 1024
+#define PDT_SIZE NUM_ENTRIES * sizeof(struct pde)
 #define MAX_NUM_MEMORY_MAP  100
 #define FOUR_KB     0x1000
 #define PAGING_PL0        0
@@ -25,12 +26,6 @@
 
 #define IS_ENTRY_PRESENT(e) ((e)->config && 0x01)
 
-struct pde
-{
-    uint8_t config;
-    uint8_t low_addr; /* only the highest 4 bits are used */
-    uint16_t high_addr;
-} __attribute__((packed));
 #define PAGING_READ_WRITE 1
 
 struct pte
@@ -57,20 +52,23 @@ static struct page_frame_bitmap page_frames;
 static struct memory_map mmap[MAX_NUM_MEMORY_MAP];
 static uint32_t mmap_len;
 
-static void create_pdt_entry(
-    struct pde *pdt,
-    uint32_t n,
-    uint32_t paddr,
-    uint8_t ps,
-    uint8_t rw,
-    uint8_t pl);
+static void
+pfa_free(uint32_t paddr);
 
-static void create_pt_entry(
-    struct pte *pt,
-    uint32_t n,
-    uint32_t paddr,
-    uint8_t rw,
-    uint8_t pl);
+static void
+toggle_bit(uint32_t bit_idx);
+
+
+static void
+create_pdt_entry(struct pde *pdt, uint32_t n, uint32_t paddr, uint8_t ps,
+                 uint8_t rw, uint8_t pl);
+
+static void
+create_pt_entry(struct pte *pt, uint32_t n, uint32_t paddr, uint8_t rw,
+                uint8_t pl);
+
+static uint32_t
+idx_for_paddr(uint32_t paddr);
 
 static uint32_t
 align_up(
@@ -136,6 +134,31 @@ static uint32_t
 kernel_get_temporary_entry()
 {
     return *((uint32_t *) &kernel_pt[KERNEL_TMP_PT_IDX]);
+}
+
+struct pde *
+pdt_create(uint32_t *out_paddr)
+{
+    struct pde *pdt;
+    *out_paddr = 0;
+    uint32_t pdt_paddr = pfa_allocate(1);
+    uint32_t pdt_vaddr = pdt_kernel_find_next_vaddr(PDT_SIZE);
+    uint32_t size = pdt_map_kernel_memory(pdt_paddr, pdt_vaddr, PDT_SIZE,
+                                          PAGING_READ_WRITE, PAGING_PL0);
+    if (size < PDT_SIZE) {
+        /* Since PDT_SIZE is the size of one frame, size must either be equal
+         * to PDT_SIZE or 0
+         */
+        pfa_free(pdt_paddr);
+        return NULL;
+    }
+
+    pdt = (struct pde *) pdt_vaddr;
+
+    memset(pdt, 0, PDT_SIZE);
+
+    *out_paddr = pdt_paddr;
+    return pdt;
 }
 
 static uint32_t
@@ -478,6 +501,17 @@ frames_init(
 }
 
 static void
+pfa_free(uint32_t paddr)
+{
+    uint32_t bit_idx = idx_for_paddr(paddr);
+    if (bit_idx == page_frames.len) {
+        printk("pfa_free: invalid paddr %X\n", paddr);
+    } else {
+        toggle_bit(bit_idx);
+    }
+}
+
+static void
 toggle_bit(uint32_t bit_idx)
 {
     uint32_t *bits = page_frames.start;
@@ -491,6 +525,22 @@ toggle_bits(uint32_t bit_idx, uint32_t num_bits)
     for (i = bit_idx; i < bit_idx + num_bits; ++i) {
         toggle_bit(i);
     }
+}
+
+static uint32_t
+idx_for_paddr(uint32_t paddr)
+{
+    uint32_t i, byte_offset = 0;
+    for (i = 0; i < mmap_len; ++i) {
+        if (paddr < mmap[i].addr + mmap[i].len) {
+            byte_offset += paddr - mmap[i].addr;
+            return byte_offset / FOUR_KB;
+        } else {
+            byte_offset += mmap[i].len;
+        }
+    }
+
+    return page_frames.len;
 }
 
 static uint32_t

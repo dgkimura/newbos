@@ -3,9 +3,6 @@
 
 #include <stdint.h>
 
-#define KMALLOC_START  0x100000
-#define KMALLOC_LENGTH 0x100000
-
 void *
 kmalloc(
     uint32_t size

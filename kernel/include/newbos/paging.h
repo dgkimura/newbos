@@ -12,6 +12,13 @@
 #define PAGING_PL0        0
 #define PAGING_PL3        1
 
+struct pde
+{
+    uint8_t config;
+    uint8_t low_addr; /* only the highest 4 bits are used */
+    uint16_t high_addr;
+} __attribute__((packed));
+
 void
 frames_init(
     uint32_t kernel_physical_start,
@@ -28,6 +35,11 @@ pfa_allocate(
     uint32_t num_page_frames
 );
 
+struct pde *
+pdt_create(
+    uint32_t *out_paddr
+);
+
 uint32_t
 pdt_map_kernel_memory(
     uint32_t paddr,
@@ -35,6 +47,11 @@ pdt_map_kernel_memory(
     uint32_t size,
     uint8_t rw,
     uint8_t pl
+);
+
+uint32_t
+pdt_kernel_find_next_vaddr(
+    uint32_t size
 );
 
 #endif

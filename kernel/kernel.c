@@ -1,5 +1,6 @@
 #include <newbos/kmalloc.h>
 #include <newbos/paging.h>
+#include <newbos/process.h>
 #include <newbos/printk.h>
 #include <newbos/timer.h>
 #include <newbos/tty.h>
@@ -52,7 +53,8 @@ kernel_main(
 
     //timer_init(1000);
 
-    //process_init();
+    struct process *p = process_create("/bin/init", 1);
+    printk("Finished process init %u!!!\n", p->id);
 
     // Loop forever.
     for (;;);
