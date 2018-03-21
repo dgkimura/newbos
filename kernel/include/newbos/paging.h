@@ -50,6 +50,16 @@ pdt_map_kernel_memory(
 );
 
 uint32_t
+pdt_map_memory(
+    struct pde *pdt,
+    uint32_t paddr,
+    uint32_t vaddr,
+    uint32_t size,
+    uint8_t rw,
+    uint8_t pl
+);
+
+uint32_t
 pdt_kernel_find_next_vaddr(
     uint32_t size
 );

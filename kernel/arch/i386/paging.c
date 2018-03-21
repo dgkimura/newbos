@@ -260,7 +260,7 @@ static uint32_t pt_map_memory(
     return mapped_size;
 }
 
-static uint32_t
+uint32_t
 pdt_map_memory(
     struct pde *pdt,
     uint32_t paddr,
