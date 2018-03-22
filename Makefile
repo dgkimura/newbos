@@ -8,6 +8,7 @@ kernel/kernel.c \
 kernel/kmalloc.c \
 kernel/printk.c \
 kernel/process.c \
+kernel/scheduler.c \
 lib/stdlib.c \
 lib/string.c \
 

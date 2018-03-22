@@ -2,6 +2,7 @@
 #include <newbos/paging.h>
 #include <newbos/process.h>
 #include <newbos/printk.h>
+#include <newbos/scheduler.h>
 #include <newbos/timer.h>
 #include <newbos/tty.h>
 
@@ -53,7 +54,8 @@ kernel_main(
 
     //timer_init(1000);
 
-    struct process *p = process_create("/bin/init", 1);
+    struct process *p = process_create("/bin/init");
+    scheduler_add_process(p);
     printk("Finished process init %u!!!\n", p->id);
 
     // Loop forever.

@@ -3,6 +3,7 @@
 #include <newbos/kmalloc.h>
 #include <newbos/process.h>
 #include <newbos/printk.h>
+#include <newbos/scheduler.h>
 
 #include "memory.h"
 
@@ -31,13 +32,12 @@ void
 process_init(
     void)
 {
-    process_create("/bin/init", 1);
+    process_create("/bin/init");
 }
 
 struct process *
 process_create(
-    char const *path,
-    uint32_t id)
+    char const *path)
 {
     struct process *p;
 
@@ -50,7 +50,7 @@ process_create(
     /*
      * Initialize process structure.
      */
-    p->id = id;
+    p->id = scheduler_next_pid();
     p->parent_id = 0;
     p->pdt = 0;
     p->pdt_paddr = 0;
@@ -186,6 +186,7 @@ process_create(
         p->kernel_stack_start_vaddr = vaddr + bytes - 4;
     }
 
+    p->current = p->user_mode;
     return p;
 }
 

@@ -58,8 +58,7 @@ process_init(
 
 struct process *
 process_create(
-    char const *path,
-    uint32_t id
+    char const *path
 );
 
 #endif
