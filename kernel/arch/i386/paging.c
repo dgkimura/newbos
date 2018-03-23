@@ -146,7 +146,8 @@ pdt_create(uint32_t *out_paddr)
     uint32_t size = pdt_map_kernel_memory(pdt_paddr, pdt_vaddr, PDT_SIZE,
                                           PAGING_READ_WRITE, PAGING_PL0);
     if (size < PDT_SIZE) {
-        /* Since PDT_SIZE is the size of one frame, size must either be equal
+        /*
+         * Since PDT_SIZE is the size of one frame, size must either be equal
          * to PDT_SIZE or 0
          */
         pfa_free(pdt_paddr);
@@ -337,6 +338,22 @@ pdt_map_kernel_memory(
                           size, rw, pl);
 }
 
+void
+pdt_load_process_pdt(
+    struct pde *pdt,
+    uint32_t pdt_paddr)
+{
+    uint32_t i;
+
+    for (i = KERNEL_PDT_IDX; i < NUM_ENTRIES; ++i) {
+        if (IS_ENTRY_PRESENT(kernel_pdt + i)) {
+            pdt[i] = kernel_pdt[i];
+        }
+    }
+
+    pdt_set(pdt_paddr);
+}
+
 static uint32_t fill_memory_map(
     uint32_t kernel_physical_start,
     uint32_t kernel_physical_end,
@@ -476,8 +493,8 @@ frames_init(
     printk(" Virtual:  [%X ... %X]\n",
            kernel_virtual_start, kernel_virtual_end);
 
-    kernel_pdt =  kernel_pdt_vaddr,
-    kernel_pt = kernel_pt_vaddr,
+    kernel_pdt =  kernel_pdt_vaddr;
+    kernel_pt = kernel_pt_vaddr;
 
     mmap_len = fill_memory_map(
         kernel_physical_start,

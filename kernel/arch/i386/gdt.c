@@ -1,3 +1,5 @@
+#include <newbos/process.h>
+
 #include "gdt.h"
 
 #define SEGMENT_BASE    0
@@ -9,7 +11,7 @@
 #define CODE_RX_TYPE    0xA
 #define DATA_RW_TYPE    0x2
 
-#define GDT_NUM_ENTRIES 5
+#define GDT_NUM_ENTRIES 6
 
 /*
  * Lets us access our ASM functions from our C code.
@@ -17,6 +19,9 @@
 void gdt_flush(uint32_t);
 
 static void gdt_set_gate(uint32_t num, uint8_t plevel, uint8_t type);
+
+static void
+gdt_create_tss_entry(uint32_t n, uint32_t tss_vaddr);
 
 /*
  * This structure contains the value of one GDT entry.
@@ -46,9 +51,10 @@ struct gdt_ptr
 
 struct gdt_entry gdt_entries[GDT_NUM_ENTRIES];
 
-void gdt_init()
+void
+gdt_init(uint32_t tss_vaddr)
 {
-	struct gdt_ptr gdt_ptr;
+    struct gdt_ptr gdt_ptr;
     gdt_ptr.limit = sizeof(struct gdt_entry) * GDT_NUM_ENTRIES;
     gdt_ptr.base = (uint32_t)&gdt_entries;
 
@@ -57,6 +63,8 @@ void gdt_init()
     gdt_set_gate(2, PL0, DATA_RW_TYPE); /* Data segment */
     gdt_set_gate(3, PL3, CODE_RX_TYPE); /* User mode code segment */
     gdt_set_gate(4, PL3, DATA_RW_TYPE); /* User mode data segment */
+
+    gdt_create_tss_entry(5, tss_vaddr);
 
     gdt_flush((uint32_t)&gdt_ptr);
 }
@@ -94,4 +102,38 @@ gdt_set_gate(uint32_t num, uint8_t plevel, uint8_t type)
      */
     gdt_entries[num].access =
         (0x01 << 7) |((plevel & 0x03) << 5) | (0x01 << 4) | (type & 0x0F);
+}
+
+static void
+gdt_create_tss_entry(uint32_t n, uint32_t tss_vaddr)
+{
+    gdt_entries[n].base_low     = (tss_vaddr & 0xFFFF);
+    gdt_entries[n].base_mid     = (tss_vaddr >> 16) & 0xFF;
+    gdt_entries[n].base_high    = (tss_vaddr >> 24) & 0xFF;
+
+    gdt_entries[n].limit_low    = sizeof(struct tss) - 1;
+
+    /* access should here be called type */
+    /*
+     * name | values | size | desc
+     *    1 |      1 |    1 | Constant
+     *    B |      0 |    1 | Busy
+     *    0 |      0 |    1 | Constant
+     *    1 |      1 |    1 | Constant
+     *    0 |      0 |    1 | Constant
+     *  DPL |    PL0 |    2 | Privilege level
+     *    P |      1 |    1 | Present
+     */
+    gdt_entries[n].access = (0x01 << 7) | (0x01 << 3) | (0x01);
+
+    /*
+     * name | value | size | desc
+     * ---------------------------
+     *    G |     0 |    1 | granularity, size of segment unit, 0 = bytes
+     *    0 |     0 |    1 | Constant
+     *    0 |     0 |    1 | Constant
+     *  AVL |     0 |    1 | "available for use by system software"
+     *  LIM |     0 |    4 | the four highest bits of segment limit
+     */
+    gdt_entries[n].granularity = 0;
 }

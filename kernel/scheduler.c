@@ -3,6 +3,14 @@
 #include <newbos/kmalloc.h>
 #include <newbos/scheduler.h>
 
+/*
+ * segements
+ */
+#define SEGSEL_KERNEL_CS 0x08
+#define SEGSEL_KERNEL_DS 0x10
+#define SEGSEL_USER_SPACE_CS 0x18
+#define SEGSEL_USER_SPACE_DS 0x20
+
 struct process_list_element {
     struct process_list_element *next;
     struct process *ps;
@@ -60,4 +68,38 @@ scheduler_add_process(
 
     runnable_processes.end = e;
     return 0;
+}
+
+void
+scheduler_schedule(
+    void)
+{
+    if (runnable_processes.start == NULL ||
+        runnable_processes.start->ps == NULL)
+    {
+        printk("scheduler: There are no runnable processes to schedule\n");
+        return;
+    }
+
+    struct process_list_element *e = runnable_processes.start;
+    if (e->next != NULL)
+    {
+        /*
+         * More than one element in the list. Move current process (head of
+         * list) to the end of list.
+         */
+        runnable_processes.start = e->next;
+        e->next = NULL;
+        runnable_processes.end->next = e;
+        runnable_processes.end = e;
+    }
+
+    struct process *p = runnable_processes.start->ps;
+    if (p == NULL)
+    {
+        printk("scheduler: No process to schedule\n");
+        return;
+    }
+
+    tss_set_kernel_stack(SEGSEL_KERNEL_DS, p->kernel_stack_start_vaddr);
 }

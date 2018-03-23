@@ -22,7 +22,8 @@ kernel_main(
     struct multiboot_info *minfo,
     uint32_t magic_number)
 {
-    gdt_init();
+    uint32_t tss_vaddr = tss_init();
+    gdt_init(tss_vaddr);
     clear_idt();
 
     interrupts_init();
@@ -56,6 +57,7 @@ kernel_main(
 
     struct process *p = process_create("/bin/init");
     scheduler_add_process(p);
+    scheduler_schedule();
     printk("Finished process init %u!!!\n", p->id);
 
     // Loop forever.

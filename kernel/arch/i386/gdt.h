@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
-void gdt_init();
+void
+gdt_init(
+    uint32_t tss_vaddr
+);
 
 #endif

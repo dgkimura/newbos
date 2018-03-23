@@ -49,6 +49,12 @@ pdt_map_kernel_memory(
     uint8_t pl
 );
 
+void
+pdt_load_process_pdt(
+    struct pde *pdt,
+    uint32_t pdt_paddr
+);
+
 uint32_t
 pdt_map_memory(
     struct pde *pdt,

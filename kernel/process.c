@@ -17,6 +17,8 @@
 /*
  * segements
  */
+#define SEGSEL_KERNEL_CS 0x08
+#define SEGSEL_KERNEL_DS 0x10
 #define SEGSEL_USER_SPACE_CS 0x18
 #define SEGSEL_USER_SPACE_DS 0x20
 
@@ -25,8 +27,26 @@
  */
 #define REG_EFLAGS_DEFAULT 0x202
 
+static struct tss tss;
+
 static uint32_t
 div_ceil( uint32_t num, uint32_t den);
+
+uint32_t
+tss_init(
+    void)
+{
+    return (uint32_t) &tss;
+}
+
+void
+tss_set_kernel_stack(
+    uint16_t segsel,
+    uint32_t vaddr)
+{
+    tss.esp0 = vaddr;
+    tss.ss0 = segsel;
+}
 
 void
 process_init(
