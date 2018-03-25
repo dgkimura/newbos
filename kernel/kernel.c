@@ -4,7 +4,6 @@
 #include <newbos/printk.h>
 #include <newbos/scheduler.h>
 #include <newbos/timer.h>
-#include <newbos/tty.h>
 
 #include "gdt.h"
 #include "interrupts.h"
