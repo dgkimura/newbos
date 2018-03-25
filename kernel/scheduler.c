@@ -102,4 +102,5 @@ scheduler_schedule(
     }
 
     tss_set_kernel_stack(SEGSEL_KERNEL_DS, p->kernel_stack_start_vaddr);
+    pdt_load_process_pdt(p->pdt, p->pdt_paddr);
 }

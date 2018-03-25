@@ -9,6 +9,7 @@
 #include "gdt.h"
 #include "interrupts.h"
 #include "keyboard.h"
+#include "memory.h"
 #include "multiboot.h"
 
 void
@@ -41,7 +42,8 @@ kernel_main(
 
     frames_init(kernel_physical_start, kernel_physical_end,
                 kernel_virtual_start, kernel_virtual_end,
-                kernel_pdt_vaddr, kernel_pt_vaddr,
+                VIRTUAL_TO_PHYSICAL(kernel_pdt_vaddr),
+                VIRTUAL_TO_PHYSICAL(kernel_pt_vaddr),
                 minfo);
 
     //asm volatile ("int $0x3");

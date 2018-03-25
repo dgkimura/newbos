@@ -283,9 +283,11 @@ pdt_map_memory(
 
         tmp_entry = kernel_get_temporary_entry();
 
-        if (!IS_ENTRY_PRESENT(pdt + pdt_idx)) {
+        if (!IS_ENTRY_PRESENT(pdt + pdt_idx))
+        {
             pt_paddr = pfa_allocate(1);
-            if (pt_paddr == 0) {
+            if (pt_paddr == 0)
+            {
                 printk("Couldn't allocate page frame for new page table."
                        "pdt_idx: %u, data vaddr: %X, data paddr: %X, "
                        "data size: %u\n",
@@ -303,7 +305,8 @@ pdt_map_memory(
         mapped_size =
             pt_map_memory(pt, pdt_idx, paddr, vaddr, size, rw, pl);
 
-        if (mapped_size == 0) {
+        if (mapped_size == 0)
+        {
             printk("Could not map memory in page table. "
                    "pt: %X, paddr: %X, vaddr: %X, size: %u\n",
                    (uint32_t) pt, paddr, vaddr, size);
@@ -311,7 +314,8 @@ pdt_map_memory(
             return 0;
         }
 
-        if (!IS_ENTRY_PRESENT(pdt + pdt_idx)) {
+        if (!IS_ENTRY_PRESENT(pdt + pdt_idx))
+        {
             create_pdt_entry(pdt, pdt_idx, pt_paddr, PS_4KB, rw, pl);
         }
 
@@ -351,7 +355,9 @@ pdt_load_process_pdt(
         }
     }
 
-    pdt_set(pdt_paddr);
+    // TODO: load process pdt
+    //       pdt_set(pdt_paddr);
+    pdt_set(kernel_pdt);
 }
 
 static uint32_t fill_memory_map(
@@ -493,8 +499,8 @@ frames_init(
     printk(" Virtual:  [%X ... %X]\n",
            kernel_virtual_start, kernel_virtual_end);
 
-    kernel_pdt =  kernel_pdt_vaddr;
-    kernel_pt = kernel_pt_vaddr;
+    kernel_pdt =  (struct pdt *)kernel_pdt_vaddr;
+    kernel_pt = (struct pt *)kernel_pt_vaddr;
 
     mmap_len = fill_memory_map(
         kernel_physical_start,
