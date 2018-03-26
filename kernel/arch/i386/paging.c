@@ -349,15 +349,15 @@ pdt_load_process_pdt(
 {
     uint32_t i;
 
+    // TODO: Remove first page entry
+    pdt[0] = kernel_pdt[0];
+
     for (i = KERNEL_PDT_IDX; i < NUM_ENTRIES; ++i) {
         if (IS_ENTRY_PRESENT(kernel_pdt + i)) {
             pdt[i] = kernel_pdt[i];
         }
     }
-
-    // TODO: load process pdt
-    //       pdt_set(pdt_paddr);
-    pdt_set(kernel_pdt);
+    pdt_set(pdt_paddr);
 }
 
 static uint32_t fill_memory_map(
