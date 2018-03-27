@@ -1,5 +1,3 @@
-#include <stddef.h>
-
 #include <newbos/kmalloc.h>
 #include <newbos/paging.h>
 #include <newbos/printk.h>

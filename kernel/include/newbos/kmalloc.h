@@ -1,11 +1,11 @@
 #ifndef _NEWBOS_HEAP_H
 #define _NEWBOS_HEAP_H
 
-#include <stdint.h>
+#include <stddef.h>
 
 void *
 kmalloc(
-    uint32_t size
+    size_t size
 );
 
 void
