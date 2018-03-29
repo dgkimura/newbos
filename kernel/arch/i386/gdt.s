@@ -1,6 +1,6 @@
 /*
-This is a function to load the gdt.
-*/
+ * Load the gdt into the cpu, and enter the kernel segments.
+ */
 .global gdt_flush
 .type gdt_flush, @function
 gdt_flush:
