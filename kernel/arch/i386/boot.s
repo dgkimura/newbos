@@ -115,12 +115,12 @@ _start:
 setup_kernel_pdt:
     mov $(kernel_pdt - KERNEL_START_VADDR + KERNEL_PDT_IDX*4), %ecx
     mov $(kernel_pt - KERNEL_START_VADDR), %edx
-    or  $0x0000000B, %edx
+    or  $0x0000000B, %edx # write-through, writable, present
     mov %edx, (%ecx)
 
 setup_kernel_pt:
     mov $(kernel_pt - KERNEL_START_VADDR), %eax
-    mov $0x0000000B, %ecx
+    mov $0x0000000B, %ecx # write-through, writable, present
 
 loop:
     mov %ecx, (%eax)
