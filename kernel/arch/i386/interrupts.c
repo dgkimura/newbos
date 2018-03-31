@@ -155,10 +155,41 @@ interrupt_handler(registers_t* regs)
     }
     else
     {
-        printk("Unhandled exception - %X : [errno - %X]: %s\n",
+        printk("Unhandled exception - %X : [errno - %X]: %s\n"
+               "Data segments: gs[%X], fs[%X], es[%X], ds[%X]\n"
+               "edi: %X\n"
+               "esi: %X\n"
+               "ebp: %X\n"
+               "esp: %X\n"
+               "ebx: %X\n"
+               "edx: %X\n"
+               "ecx: %X\n"
+               "eax: %X\n"
+               "eip: %X\n"
+               "cs: %X\n"
+               "eflags: %X\n"
+               "usersp: %X\n"
+               "ss: %X\n",
                regs->interrupt_number,
                regs->error_code,
-               exception_messages[regs->interrupt_number]);
+               exception_messages[regs->interrupt_number],
+               regs->gs,
+               regs->fs,
+               regs->es,
+               regs->ds,
+               regs->edi,
+               regs->esi,
+               regs->ebp,
+               regs->esp,
+               regs->ebx,
+               regs->edx,
+               regs->ecx,
+               regs->eax,
+               regs->eip,
+               regs->cs,
+               regs->eflags,
+               regs->useresp,
+               regs->ss);
         abort();
     }
 }
