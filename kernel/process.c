@@ -111,6 +111,37 @@ process_create(
     /*
      * TODO: Load process code
      */
+    {
+        uint32_t pfs, paddr, kernel_vaddr, mapped_memory_size;
+        uint32_t vaddr = 0x00000000, file_size = 42;
+        pfs = div_ceil(file_size, FOUR_KB);
+        paddr = pfa_allocate(pfs);
+
+        kernel_vaddr = pdt_kernel_find_next_vaddr(file_size);
+        mapped_memory_size =
+            pdt_map_kernel_memory(paddr, kernel_vaddr, file_size,
+                                  PAGING_READ_WRITE, PAGING_PL0);
+        pdt_unmap_kernel_memory(kernel_vaddr, file_size);
+        mapped_memory_size =
+            pdt_map_memory(p->pdt, paddr, vaddr, file_size,
+                           PAGING_READ_WRITE, PAGING_PL3);
+        if (mapped_memory_size < file_size)
+        {
+            printk("Could not map memory in proc PDT. "
+                   "vaddr: %X, paddr %X, size %u, pdt: %X\n",
+                   vaddr, paddr, file_size, (uint32_t)p->pdt);
+        }
+
+        struct paddr_ele *code_paddrs;
+        code_paddrs = kmalloc(sizeof(struct paddr_ele));
+        code_paddrs->paddr = paddr;
+        code_paddrs->count = pfs;
+
+        p->code_paddrs.start = code_paddrs;
+        p->code_paddrs.end = code_paddrs;
+        p->user_mode.eip = vaddr;
+        p->code_start_vaddr = vaddr;
+    }
 
     /*
      * Load process stack

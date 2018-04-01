@@ -103,4 +103,10 @@ scheduler_schedule(
 
     tss_set_kernel_stack(SEGSEL_KERNEL_DS, p->kernel_stack_start_vaddr);
     pdt_load_process_pdt(p->pdt, p->pdt_paddr);
+
+    if (p->current.cs == SEGSEL_KERNEL_CS) {
+        // TODO: run_process_in_kernel_mode(&p->current);
+    } else {
+        run_process_in_user_mode(&p->current);
+    }
 }

@@ -17,3 +17,10 @@ flush:
     mov %ax, %gs
     mov %ax, %ss
     ret
+
+.global tss_load_and_set
+.type tss_load_and_set, @function
+tss_load_and_set:
+    mov 4(%esp), %ax     # mov the tss segsel into ax (16 bits)
+    ltr %ax              # load the task register with the selector
+    ret

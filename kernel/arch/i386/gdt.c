@@ -13,6 +13,8 @@
 
 #define GDT_NUM_ENTRIES 6
 
+#define TSS_SEGSEL      (5*8)
+
 /*
  * Lets us access our ASM functions from our C code.
  */
@@ -67,6 +69,8 @@ gdt_init(uint32_t tss_vaddr)
     gdt_create_tss_entry(5, tss_vaddr);
 
     gdt_flush((uint32_t)&gdt_ptr);
+
+    tss_load_and_set(TSS_SEGSEL);
 }
 
 /*

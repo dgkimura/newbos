@@ -10,6 +10,7 @@
 #define PDT_SIZE NUM_ENTRIES * sizeof(struct pde)
 #define MAX_NUM_MEMORY_MAP  100
 #define FOUR_KB     0x1000
+#define FOUR_MB     0x400000
 #define PAGING_PL0        0
 #define PS_4KB 0x00
 
@@ -20,6 +21,7 @@
 #define KERNEL_START_VADDR  0xC0000000
 #define KERNEL_TMP_PT_IDX   1023
 #define PT_ENTRY_SIZE  FOUR_KB
+#define PDT_ENTRY_SIZE FOUR_MB
 #define KERNEL_TMP_VADDR \
     (KERNEL_START_VADDR + KERNEL_TMP_PT_IDX * PT_ENTRY_SIZE)
 #define KERNEL_PT_PDT_IDX VIRTUAL_TO_PDT_IDX(KERNEL_START_VADDR)
@@ -69,6 +71,11 @@ create_pt_entry(struct pte *pt, uint32_t n, uint32_t paddr, uint8_t rw,
 
 static uint32_t
 idx_for_paddr(uint32_t paddr);
+
+static uint32_t
+pt_unmap_memory( struct pte *pt, uint32_t pdt_idx, uint32_t vaddr, uint32_t size);
+
+void pdt_set(uint32_t);
 
 static uint32_t
 align_up(
@@ -162,6 +169,58 @@ pdt_create(uint32_t *out_paddr)
     return pdt;
 }
 
+uint32_t
+pdt_unmap_memory(struct pde *pdt, uint32_t vaddr, uint32_t size)
+{
+    uint32_t pdt_idx, pt_paddr, pt_vaddr, tmp_entry;
+
+    uint32_t freed_size = 0;
+    uint32_t end_vaddr;
+
+    size = align_up(size, PT_ENTRY_SIZE);
+    end_vaddr = vaddr + size;
+
+    while (vaddr < end_vaddr)
+    {
+        pdt_idx = VIRTUAL_TO_PDT_IDX(vaddr);
+
+        if (!IS_ENTRY_PRESENT(pdt + pdt_idx))
+        {
+            vaddr = align_up(vaddr, PDT_ENTRY_SIZE);
+            continue;
+        }
+
+        pt_paddr = get_pt_paddr(pdt, pdt_idx);
+        tmp_entry = kernel_get_temporary_entry();
+
+        pt_vaddr = kernel_map_temporary_memory(pt_paddr);
+
+        freed_size =
+            pt_unmap_memory((struct pte *) pt_vaddr, pdt_idx, vaddr, size);
+
+        kernel_set_temporary_entry(tmp_entry);
+
+        if (freed_size == PDT_ENTRY_SIZE)
+        {
+            if (pdt_idx != KERNEL_PT_PDT_IDX)
+            {
+                pfa_free(pt_paddr);
+                memset(pdt + pdt_idx, 0, sizeof(struct pde));
+            }
+        }
+
+        vaddr += freed_size;
+    }
+
+    return freed_size;
+}
+
+uint32_t
+pdt_unmap_kernel_memory(uint32_t virtual_addr, uint32_t size)
+{
+    return pdt_unmap_memory(kernel_pdt, virtual_addr, size);
+}
+
 static uint32_t
 pt_kernel_find_next_vaddr(
     uint32_t pdt_idx,
@@ -243,9 +302,6 @@ static uint32_t pt_map_memory(
     {
         if (IS_ENTRY_PRESENT(pt + pt_idx))
         {
-            printk("Entry is present: pt: %X, pt_idx: %u, pdt_idx: %u "
-                   "pt[pt_idx]: %X\n",
-                   pt, pt_idx, pdt_idx, pt[pt_idx]);
             return mapped_size;
         } else if(pdt_idx == KERNEL_PT_PDT_IDX && pt_idx == KERNEL_TMP_PT_IDX) {
             return mapped_size;
@@ -340,6 +396,37 @@ pdt_map_kernel_memory(
 {
     return pdt_map_memory(kernel_pdt, paddr, vaddr,
                           size, rw, pl);
+}
+
+static uint32_t
+pt_unmap_memory(
+    struct pte *pt,
+    uint32_t pdt_idx,
+    uint32_t vaddr,
+    uint32_t size)
+{
+    uint32_t pt_idx = VIRTUAL_TO_PT_IDX(vaddr);
+    uint32_t freed_size = 0;
+
+    while (freed_size < size && pt_idx < NUM_ENTRIES)
+    {
+        if (pdt_idx == KERNEL_PT_PDT_IDX && pt_idx == KERNEL_TMP_PT_IDX)
+        {
+            /* can't touch this */
+            return freed_size;
+        }
+        if (IS_ENTRY_PRESENT(pt + pt_idx))
+        {
+            memset(pt + pt_idx, 0, sizeof(struct pte));
+            invalidate_page_table_entry(vaddr);
+        }
+
+        freed_size += PT_ENTRY_SIZE;
+        vaddr += PT_ENTRY_SIZE;
+        ++pt_idx;
+    }
+
+    return freed_size;
 }
 
 void

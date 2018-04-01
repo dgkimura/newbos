@@ -66,6 +66,11 @@ pdt_map_memory(
 );
 
 uint32_t
+pdt_unmap_kernel_memory(
+    uint32_t virtual_addr,
+    uint32_t size);
+
+uint32_t
 pdt_kernel_find_next_vaddr(
     uint32_t size
 );

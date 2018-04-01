@@ -24,6 +24,7 @@ $(ARCHDIR)/io.s \
 $(ARCHDIR)/keyboard.c \
 $(ARCHDIR)/paging.c \
 $(ARCHDIR)/paging.s \
+$(ARCHDIR)/scheduler.s \
 $(ARCHDIR)/timer.c \
 $(ARCHDIR)/tty.c \
 
