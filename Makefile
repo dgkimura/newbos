@@ -1,5 +1,5 @@
 CFLAGS=-ffreestanding -Wall -Wextra -nostdlib -g -O2
-LDFLAGS=
+LDFLAGS=-T $(ARCHDIR)/linker.ld -melf_i386
 
 ARCHDIR=kernel/arch/i386
 
@@ -11,32 +11,34 @@ kernel/process.c \
 kernel/scheduler.c \
 lib/stdlib.c \
 lib/string.c \
-
-OBJECTS=$(SOURCES:.c=.o)
-
-ARCH_SOURCES=\
-$(ARCHDIR)/boot.s \
-$(ARCHDIR)/interrupts.c \
-$(ARCHDIR)/interrupts.s \
 $(ARCHDIR)/gdt.c \
-$(ARCHDIR)/gdt.s \
-$(ARCHDIR)/io.s \
+$(ARCHDIR)/interrupts.c \
 $(ARCHDIR)/keyboard.c \
 $(ARCHDIR)/paging.c \
-$(ARCHDIR)/paging.s \
-$(ARCHDIR)/scheduler.s \
 $(ARCHDIR)/timer.c \
 $(ARCHDIR)/tty.c \
 
-ARCH_OBJECTS=$(ARCH_SOURCES:.s=.o)
-ARCH_OBJECTS=$(ARCH_SOURCES:.c=.o)
+OBJECTS=$(SOURCES:.c=.o)
 
-EXECUTABLE=newbos.bin libc.a
+ASSEMBLY_SOURCES=\
+$(ARCHDIR)/boot.s \
+$(ARCHDIR)/interrupts_assembler.s \
+$(ARCHDIR)/gdt_assembler.s \
+$(ARCHDIR)/io.s \
+$(ARCHDIR)/paging_assembler.s \
+$(ARCHDIR)/scheduler_assembler.s \
 
-all: $(OBJECTS) $(EXECUTABLE) $(ARCH_OBJECTS)
+ASSEMBLY_OBJECTS=$(ASSEMBLY_SOURCES:.s=.o)
 
-newbos.bin: libc.a $(OBJECTS) $(ARCH_OBJECTS)
-	$(CC) $(CFLAGS) -T $(ARCHDIR)/linker.ld -o newbos.bin $(OBJECTS) $(ARCH_OBJECTS)
+EXECUTABLE=newbos.bin libc.a newbos.elf
+
+all: $(OBJECTS) $(EXECUTABLE) $(ASSEMBLY_OBJECTS)
+
+newbos.elf: $(OBJECTS) $(ASSEMBLY_OBJECTS)
+	$(LD) $(LDFLAGS) $(OBJECTS) $(ASSEMBLY_OBJECTS) -o newbos.elf -I include -I kernel/include -I $(ARCHDIR)
+
+newbos.bin: libc.a $(OBJECTS) $(ASSEMBLY_OBJECTS)
+	$(CC) $(CFLAGS) -T $(ARCHDIR)/linker.ld -o newbos.bin $(OBJECTS) $(ASSEMBLY_OBJECTS)
 
 libc.a: $(OBJECTS)
 	$(AR) rcs $@ $(OBJECTS)
@@ -45,7 +47,7 @@ libc.a: $(OBJECTS)
 	$(CC) $(CFLAGS) -c $< -o $@ -I include -I kernel/include -I $(ARCHDIR)
 
 .s.o:
-	$(AS) -c $< -o $@
+	$(CC) -c $< -o $@
 
 clean:
 	rm -f libc.a newbos.bin

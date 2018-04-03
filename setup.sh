@@ -45,3 +45,4 @@ fi
 export CC=$HOME/opt/cross/bin/i686-elf-gcc
 export AR=$HOME/opt/cross/bin/i686-elf-ar
 export AS=$HOME/opt/cross/bin/i686-elf-as
+export LD=$HOME/opt/cross/bin/i686-elf-ld
