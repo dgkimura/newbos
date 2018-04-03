@@ -14,11 +14,11 @@ $ make
 $ qemu-system-i386 -kernel newbos.bin
 ```
 
-## Debugging Tips
+## Debugging Tips [FIXME: broken by high-half kernel commit b7ab2ae790c15f1f9ceceaee2881cdc25cee16be]
 You can attach a debugger after setting up symbols and launching in freeze mode.
 ```
 $ objcopy --only-keep-debug newbos.bin newbos.sym
-$ qemu-system-i386 -kernel newbos -s -S
+$ qemu-system-i386 -kernel newbos.bin -s -S
 ```
 
 Now you can attach gdb.
