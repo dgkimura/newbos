@@ -25,7 +25,7 @@ Now you can attach gdb.
 ```
 $ gdb
 (gdb) # map symbol file to higher half kernel memory
-(gdb) add-symbol-file newbos.elf 0xC0100000
+(gdb) add-symbol-file newbos.sym 0xC0100000
 (gdb) target remote localhost:1234
 (gdb) break kernel_main
 (gdb) continue

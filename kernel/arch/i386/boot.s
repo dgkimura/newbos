@@ -144,6 +144,11 @@ enable_paging:
     or  $0x80000000, %ecx # the highest bit controls paging
     mov %ecx, %cr0        # enable paging by writing config to cr0
 
+    lea higher_half, %ecx # store the address higher_half in ecx
+    jmp %ecx              # now we jump into 0xC0100000
+
+higher_half:
+
     /*
      * Grub bootloader specification states that EBX must contain the 32-bit
      * physical address of the multiboot information structure.
