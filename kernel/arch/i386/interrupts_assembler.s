@@ -9,11 +9,11 @@ idt_flush:
     ret
 
 /*
-These are the interrupt service routines that our interrupt-descriptor-table
-references. The values pushed are the error code followed by the interrupt
-number. In the case where the interrupt doesn't push an error code, a dummy of
-0 is pushed instead.
-*/
+ * These are the interrupt service routines that our interrupt-descriptor-table
+ * references. The values pushed are the error code followed by the interrupt
+ * number. In the case where the interrupt doesn't push an error code, a dummy
+ * of 0 is pushed instead.
+ */
 
 .global isr0
 .type isr0, @function
@@ -266,10 +266,10 @@ isr31:
     jmp isr_common_stub
 
 /*
-This is a common ISR stub. It saves the processor state, sets up for kernel
-mode segments, calls the c-level fault hander, and finally restores the stack
-frame.
-*/
+ * This is a common ISR stub. It saves the processor state, sets up for kernel
+ * mode segments, calls the c-level fault hander, and finally restores the
+ * stack frame.
+ */
 isr_common_stub:
     pusha
 
@@ -308,9 +308,9 @@ isr_common_stub:
     iret
 
 /*
-This macro creates a stub for an IRQ - the first parameter is
-the IRQ number, the second is the ISR number it is remapped to
-*/
+ * This macro creates a stub for an IRQ - the first parameter is the IRQ
+ * number, the second is the ISR number it is remapped to
+ */
 .global irq0
 .type irq0, @function
 irq0:
@@ -440,10 +440,10 @@ irq15:
     jmp irq_common_stub
 
 /*
-This is a common IRQ stub. It saves the processor state, sets up for kernel
-mode segments, calls the c-level fault hander, and finally restores the stack
-frame.
-*/
+ * This is a common IRQ stub. It saves the processor state, sets up for kernel
+ * mode segments, calls the c-level fault hander, and finally restores the
+ * stack frame.
+ */
 irq_common_stub:
     pusha
 
